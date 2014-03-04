@@ -1,0 +1,208 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+<style>
+	#cnv canvas{
+		position: absolute;
+		left: 0;
+		top: 0;		
+	}
+</style>
+<script type="text/javascript"> 
+
+var keyFunctions={
+	37 : "left",
+	39 : "right",
+	38 : "up",
+	40 : "down",
+	27 : "clear",
+}
+
+var players = {};
+var screenMessages = [];
+
+
+;
+var socket;
+    $(document).ready(function(){
+
+        socket  = io.connect(document.URL),
+        text = $('#text');
+
+        socket.on('connect', function () {
+			console.log("connected");
+            text.html('connected');        
+        });
+		
+		socket.on('message', function (msg) {
+                text.html(msg);
+            });
+
+        socket.on('disconnect', function () {
+			console.log("disconnected");
+            text.html('disconnected');
+        });
+		
+		socket.on('caneva', function (world) {
+			players = {};
+            initCanvas(world);
+        });
+		
+		socket.on('playerUpdate', function (player) {			
+			App.line(player.x,player.y,player.x,player.y,'#'+player.color);		
+			players[player.name]=player;
+			refreshLayer();
+        });
+		
+		socket.on('playerQuit', function (player) {
+            delete players[player.name];
+        });
+		
+		socket.on('showMessagesSreeen', function (textMess) {
+            putmessage(textMess);
+        });
+		
+		
+		
+		initKeyBinding();
+		bindChangeName();
+		
+		
+
+    });
+	
+	var App={};
+	
+	function initCanvas(world){	
+		App.layer1 = document.createElement('canvas'); //#create the canvas element
+		App.layer1.width = world.width; 
+		App.layer1.height = world.height;
+		App.layer1.style.zIndex=0;
+		
+		App.layer2 = document.createElement('canvas'); //#create the canvas element
+		App.layer2.width = world.width; 
+		App.layer2.height = world.height;
+		App.layer2.style.zIndex=1;
+		
+		$("#cnv").width(world.width).height(world.height);
+		$("#cnv").html(App.layer1); //#append it into the DOM
+		$("#cnv").append(App.layer2); //#append it into the DOM
+	 	 
+		App.ctx = App.layer1.getContext("2d");
+		App.ctx2 = App.layer2.getContext("2d");
+		
+		$.each(world.bmp,function(x,cc){
+			if(cc!=null){
+				$.each(cc,function(y,color){
+						if(x!=null && y!=null && color!=null){
+							App.line(x*world.pixelReso,y*world.pixelReso,x*world.pixelReso,y*world.pixelReso,color);
+						}
+					});
+				}
+			});
+			
+	}	
+	
+	App.line = function(x1,y1,x2,y2,color){
+		App.ctx.beginPath();
+		App.ctx.fillStyle = "solid";
+		App.ctx.lineCap = "round";
+		App.ctx.lineWidth = 6; 
+		App.ctx.strokeStyle = color;
+		App.ctx.moveTo(x1,y1);
+		App.ctx.lineTo(x2+0.01,y2+0.01);
+		App.ctx.stroke();
+	}
+	
+
+	
+	
+	function putmessage(textMess){
+		screenMessages.push({text:textMess.text,times:100,color:textMess.color});
+	};
+
+	
+	
+	function initKeyBinding(){
+		$( document ).keyup(function(a) {
+		  keyFunction='---';
+		  if (keyFunctions[a.which]!=undefined){
+			keyFunction=keyFunctions[a.which];
+		  }
+		  socket.emit('keyup', { keycode : a.which , keyFunction : keyFunction });
+		  return false;
+		});
+	}
+	
+	function refreshLayer(){	
+		App.ctx2.clearRect ( 0,0, App.ctx2.canvas.width , App.ctx2.canvas.height );	
+		
+		App.ctx2.font="10px Arial";
+		App.ctx2.fillStyle ="rgba(0, 0, 0, 0.5)";
+		//show player neme		
+		$.each(players,function(playerName,player){
+			App.ctx2.fillText(player.name+'('+player.score+')',player.x,player.y);
+		});
+		// show screen message
+		
+	
+		$.each(	screenMessages,function(num,mess){			
+			alpha=(mess.times/100);		
+			color = hexToRgb(mess.color);
+			App.ctx2.fillStyle ='rgba('+color.r+', '+color.g+', '+color.b+', ' + alpha + ')';
+			App.ctx2.font = "italic 20px Arial";
+			App.ctx2.fillText(mess.text, 50, 50+num*50);
+			mess.times *= 0.8;
+			
+			if(mess.times<10){screenMessages = _.without(screenMessages,mess);}
+		});
+	}
+	
+	function bindChangeName(){
+		$('.sendValue').bind('submit',function(e){
+			return false;
+		});
+		
+		$('.sendValue').bind('click',function(e){
+			$form = $(e.currentTarget).closest('form');
+			socket.emit("sendValue",$form.serializeArray());
+		});
+		
+	}
+	
+	
+	
+	
+	
+	
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+</script> 
+<html>
+<body>
+<div id="text"></div>
+<div id="cnv" style="border:solid 1px #eeeeee;position: relative;"></div>
+<form class="sendValue">
+	name <input name="nickname"/> <button >Change name</button>
+</form>
+
+ 
+
+</body>
+</html>
