@@ -2,7 +2,8 @@
 	var world = require('./World');
 	var Player =function() {
 		this.directionlist = ["left","right","up","down"];
-		this.name = makeid(),
+		this.id = makeid(),
+		this.name = this.id;
 		this.x = 50,		
 		this.y = 50,
 		this.score = 0,

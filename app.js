@@ -3,8 +3,8 @@
   , fs = require('fs');
 var _= require('underscore');
 var Player = require('./Player');
-app.listen(8181);
-
+app.listen(8182);
+var numplayercount =0;
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
   function (err, data) {
@@ -37,9 +37,68 @@ io.sockets.on('connection', function (socket) {
 	
   socket.emit('caneva',  world );
   player.spawn();
+  /*player.name = player.id = 'A -- ' + numplayercount;
+  numplayercount++;*/
+  players[player.id]=player;
+  console.log('Got connect!',player.id ,player.name);
+  
+  //  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
+  
   socket.on('keyup', function (data) {
-	if(data.keyFunction!=''){
-		
+	takePlayerFunction(data);	
+  });
+  
+   socket.on('touchup', function (data) {
+		takePlayerFunction(data);	
+  });
+  
+  socket.on('disconnect', function() {
+      console.log('Got disconnect!',player.id ,player.name);
+	  newplayers = {};  
+	  _.each(players,function(p){
+		if (p.id != player.id) {
+				newplayers[p.id]=p;
+			}
+	  });
+	  players = newplayers;
+	  io.sockets.emit('playerQuit',  player );  
+	  player=false;
+   });
+    
+	socket.on('sendValue', function(data) {
+		 console.log('sendValue!',data);
+		 _.each(data,function(data){
+			if(data.name=='nickname'){	
+				oldplayerName = player.name;
+				io.sockets.emit('playerQuit',  player );      
+				
+				player.name=data.value;
+				if(players[player.id]!=undefined){
+					players[player.id]=player;
+				}
+				io.sockets.emit('playerUpdate',  player );				
+				
+			}
+		 });
+		 
+	  });
+	  
+	  socket.on('printDebug', function(data) {
+		console.log(data);
+	  });
+	  
+	  function removeplayer(pp){
+		  newplayers = {};  
+		  _.each(players,function(p){
+			if (p.id != pp.id) {
+					newplayers[p.id]=pp;
+				}
+		  });
+		  players = newplayers;
+	  }
+   
+  function takePlayerFunction(data){
+	if(data.keyFunction!=''){		
 		if (player.direction!="dead"){
 			if (_.contains(player.directionlist, data.keyFunction)){
 				if (
@@ -66,76 +125,15 @@ io.sockets.on('connection', function (socket) {
 			io.sockets.emit('caneva',  world );
 		}
 	}
-	
-  });
-  
-  socket.on('disconnect', function() {
-      console.log('Got disconnect!');
-	  io.sockets.emit('playerQuit',  player );      
-	  players = _.without(players,player);
-	  player=false;
-   });
-    
-	socket.on('sendValue', function(data) {
-		 console.log('sendValue!',data);
-		 _.each(data,function(data){
-			if(data.name='nickname'){	
-				oldplayerName = player.name;
-				io.sockets.emit('playerQuit',  player );      
-				
-				player.name=data.value;
-				
-				players[player.name]=player;
-				io.sockets.emit('playerUpdate',  player );				
-				delete players[oldplayerName];
-				
-			}
-		 });
-		 
-	  });
-   
-  
+  }
   function sendMessage(message){
 	socket.emit('message',message);
 }
 
 
-playerRoutine();
 
-function playerRoutine(){
-	if(player==false) return;
-	switch(player.direction){		
-		case "right": player.x+=player.speed;break;
-		case "left": player.x-=player.speed;break;
-		case "up": player.y-=player.speed;break;
-		case "down": player.y+=player.speed;break;
-	}
-	
-	if(world.bmp[player.x/world.pixelReso]==undefined){
-		world.bmp[player.x/world.pixelReso] = [];
-	}
-	if (player.direction!="dead")
-	if (
-			player.x < 0 || player.x > world.width ||
-			player.y < 0 || player.y > world.height ||
-			world.bmp[player.x/world.pixelReso][player.y/world.pixelReso]!=null			
-		){
-		player.kill();
-		io.sockets.emit('showMessagesSreeen',{text:player.name + ' ☹' , color:player.color});
-		sendMessage("you are dead");
-	}
-	
-	world.bmp[player.x/world.pixelReso][player.y/world.pixelReso]=player.color;
 
-	
-	setTimeout (playerRoutine,50);
-	
-	if(_.contains(player.directionlist,player.direction)){	
-		players[player.name]=player;
-		io.sockets.emit('playerUpdate',  player );
-	}
-	
-}
+
   
 });
 
@@ -167,12 +165,46 @@ function serverRoutine(){
 			
 		}
 	}
-		
+	//console.log(_.size(players));
+	_.each(players,function (p){
+		playerRoutine(p);	
+	});
 	
 	
 	
 	setTimeout (serverRoutine,50);
 };
+
+function playerRoutine(player){
+	if(player==false) return;
+	switch(player.direction){		
+		case "right": player.x+=player.speed;break;
+		case "left": player.x-=player.speed;break;
+		case "up": player.y-=player.speed;break;
+		case "down": player.y+=player.speed;break;
+	}
+	
+	if(world.bmp[player.x/world.pixelReso]==undefined){
+		world.bmp[player.x/world.pixelReso] = [];
+	}
+	if (player.direction!="dead")
+	if (
+			player.x < 0 || player.x > world.width ||
+			player.y < 0 || player.y > world.height ||
+			world.bmp[player.x/world.pixelReso][player.y/world.pixelReso]!=null			
+		){
+		player.kill();
+		io.sockets.emit('showMessagesSreeen',{text:player.id + ' ☹' , color:player.color});
+	}
+	
+	world.bmp[player.x/world.pixelReso][player.y/world.pixelReso]=player.color;
+	
+	if(_.contains(player.directionlist,player.direction)){	
+		players[player.id]=player;
+		io.sockets.emit('playerUpdate',  player );
+	}
+	
+}
 
 /*
 
