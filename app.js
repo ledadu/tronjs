@@ -3,7 +3,7 @@
   , fs = require('fs');
 var _= require('underscore');
 var Player = require('./Player');
-app.listen(8182);
+app.listen(8181);
 var numplayercount =0;
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
