@@ -13,9 +13,9 @@ var World = function() {
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
-    this.app = require('http').createServer(handler)
-    this.app.listen(8181);
+    this.app = require('http').createServer(handler);    
     this.io = require('socket.io').listen(this.app); 
+    this.app.listen(8181);
 
 };
 
@@ -109,13 +109,13 @@ World.prototype.serverRoutine = function() {
 World.prototype.initSocket = function() {
     console.log(this.height);
     this.io.configure('production', function() {
-        this.io.set('log level', 1);
+      //  this.io.set('log level', 1);
     });
-    this.io.sockets.on('connection', socketConnection);
-    function socketConnection(socket){        
-        console.log('Got connect!', player.id, player.name);
+    this.io.sockets.on('connection', function(socket){       
+        
         socket.heartbeatTimeout = 5000;
         var player = new Player();
+        console.log('Got connect!', player.id, player.name);
 
         socket.emit('caneva', this.getdata());
         player.spawn();
@@ -203,11 +203,11 @@ World.prototype.initSocket = function() {
 
 
     
-    }
+    });
     
 
 
-}
+};
 
 
 
