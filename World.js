@@ -107,11 +107,12 @@ World.prototype.serverRoutine = function() {
 }
 
 World.prototype.initSocket = function() {
+    console.log(this.height);
     this.io.configure('production', function() {
         this.io.set('log level', 1);
     });
-
-    this.io.sockets.on('connection', function(socket) {
+    this.io.sockets.on('connection', socketConnection);
+    function socketConnection(socket){        
         console.log('Got connect!', player.id, player.name);
         socket.heartbeatTimeout = 5000;
         var player = new Player();
@@ -201,7 +202,9 @@ World.prototype.initSocket = function() {
         }
 
 
-    });
+    
+    }
+    
 
 
 }
