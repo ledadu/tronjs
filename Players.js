@@ -1,7 +1,7 @@
 var _ = require('underscore');
 //var world = require('./World');
 var Players = function() {
-    this.list={};
+    this.list={};   //list of Player
     //construct
 }
 

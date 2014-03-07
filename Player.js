@@ -2,14 +2,14 @@ var _ = require('underscore');
 var world = require('./World');
 var Player = function() {
     this.directionlist = ["left", "right", "up", "down"];
-    this.id = makeid(),
-            this.name = this.id;
-    this.x = 50,
-            this.y = 50,
-            this.score = 0,
-            this.color = getRandomColor(),
-            this.direction = "right",
-            this.speed = 5;
+    this.id = makeid();
+    this.name = this.id;
+    this.x = 50;
+    this.y = 50;
+    this.score = 0;
+    this.color = getRandomColor();
+    this.direction = "right";
+    this.speed = 5;
     //construct
 }
 
