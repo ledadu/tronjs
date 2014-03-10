@@ -1,5 +1,5 @@
 var _ = require('underscore');
-//var world = require('./World');
+
 var Player = function() {
     this.directionlist = ["left", "right", "up", "down"];
     this.id = makeid();

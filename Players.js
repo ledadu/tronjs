@@ -1,8 +1,6 @@
 var _ = require('underscore');
-//var world = require('./World');
 var Players = function() {
     this.list={};   //list of Player
-    //construct
 }
 
 Players.prototype.removeplayer = function (pp) {

@@ -1,13 +1,16 @@
 
 var _ = require('underscore');
 
+
+var HttpServer = require('./HttpServer');
 var World = require('./World');
 
 
 
 var numplayercount = 0;
-var world = new World();
-world.initSocket();
+var httpServer = new HttpServer();
+var world = new World(httpServer.server);
+world.initSocket(8181);
 world.serverRoutine();
 
 

@@ -2,22 +2,16 @@ var _ = require('underscore');
 var Player = require('./Player');
 var Players = require('./Players');
 
-var fs = require('fs');
 
-
-
-
-var World = function() {
+var World = function(server) {
     this.width = 800;
     this.height = 400;
-    this.tcpPort = 8181;
+    this.tcpPort = 8080;
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
-    this.app = require('http').createServer(handler);
-    this.io = require('socket.io').listen(this.app);
-    
-
+    this.server = server;
+    this.io = require('socket.io').listen(this.server);
 };
 
 
@@ -110,10 +104,12 @@ World.prototype.serverRoutine = function() {
     }, 50);
 }
 
-World.prototype.initSocket = function() {
-
+World.prototype.initSocket = function(tcpPort) {
     var that = this;
-    that.app.listen(that.tcpPort);
+    if(tcpPort!=undefined){
+        that.tcpPort = tcpPort;
+    }
+    that.server.listen(that.tcpPort);
     that.io.configure('production', function() {
         that.io.set('log level', 1);
     });
@@ -218,16 +214,3 @@ World.prototype.initSocket = function() {
 module.exports = World;
 
 
-function handler(req, res) {
-    fs.readFile(__dirname + '/index.html',
-            function(err, data) {
-                if (err) {
-                    res.writeHead(500);
-                    return res.end('Error loading index.html');
-                }
-                console.log(req.url);
-                res.writeHead(200);
-                res.end(data);
-            });
-
-}
