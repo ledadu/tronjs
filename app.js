@@ -59,7 +59,7 @@ io.sockets.on('connection', function(socket) {
                 newplayers[p.id] = p;
             }
         });
-        players = newplayers.list;
+        players.list = newplayers;
         io.sockets.emit('playerQuit', player);
         player = false;
     });
@@ -144,14 +144,14 @@ function serverRoutine() {
     if(players!=undefined){
         countplayernotdead = players.countPlayerNotDead();
     }
-    if(countplayernotdead <= 1){
+    if(countplayernotdead == 1){
         clearWorld();
         if (countplayernotdead.id!=undefined) {            
             if (_.size(players.list) > 1) {
                 countplayernotdead.score++;
             } 
         }        
-    }else{
+    }else if(countplayernotdead != 0){
         _.each(players.list, function(p) {
             playerRoutine(p);
         });
