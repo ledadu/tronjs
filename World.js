@@ -10,12 +10,13 @@ var fs = require('fs');
 var World = function() {
     this.width = 800;
     this.height = 400;
+    this.tcpPort = 8181;
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
     this.app = require('http').createServer(handler);
     this.io = require('socket.io').listen(this.app);
-    this.app.listen(8181);
+    
 
 };
 
@@ -44,7 +45,7 @@ World.prototype.clearWorld = function() {
     }
 }
 
-World.prototype.playerRoutine = function() {
+World.prototype.playersRoutine = function() {
     var that = this;
     _.each(that.players.list, function(player) {
         if (player == false)
@@ -92,7 +93,6 @@ World.prototype.serverRoutine = function() {
     that = this;
     if (that.players != undefined) {
         countplayernotdead = that.players.countPlayerNotDead();
-
         if (countplayernotdead == 0) {
             that.clearWorld();
         } else
@@ -100,11 +100,10 @@ World.prototype.serverRoutine = function() {
             that.clearWorld();
             if (_.size(that.players.list) > 1) {
                 countplayernotdead.score++;
-                console.log("++");
             }
         }
 
-        that.playerRoutine();
+        that.playersRoutine();
     }
     setTimeout(function() {
         that.serverRoutine()
@@ -114,6 +113,7 @@ World.prototype.serverRoutine = function() {
 World.prototype.initSocket = function() {
 
     var that = this;
+    that.app.listen(that.tcpPort);
     that.io.configure('production', function() {
         that.io.set('log level', 1);
     });
