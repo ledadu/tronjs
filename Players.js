@@ -15,9 +15,9 @@ Players.prototype.removeplayer = function (pp) {
         this = newplayers;
     }
     
-Players.prototype.spawnAll = function () {    
+Players.prototype.spawnAll = function (world) {    
     _.each(this.list, function(p) {
-        p.spawn();
+        p.spawn(world);
     });
 }
 

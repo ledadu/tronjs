@@ -13,8 +13,8 @@ var World = function() {
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
-    this.app = require('http').createServer(handler);    
-    this.io = require('socket.io').listen(this.app); 
+    this.app = require('http').createServer(handler);
+    this.io = require('socket.io').listen(this.app);
     this.app.listen(8181);
 
 };
@@ -23,29 +23,30 @@ var World = function() {
 
 
 World.prototype.getdata = function() {
-        var data = {
-            width  : this.width,
-            height : this.height,
-            bmp : this.bmp ,
-            pixelReso : this.pixelReso ,
-            players : this.players,
-        }
-   return data;
+    var data = {
+        width: this.width,
+        height: this.height,
+        bmp: this.bmp,
+        pixelReso: this.pixelReso,
+        players: this.players,
+    }
+    return data;
 }
 
 
 World.prototype.clearWorld = function() {
     this.bmp = [];
+    console.log("clearWorld");
     that = this;
     that.io.sockets.emit('caneva', that.getdata());
-    if(that.players!=undefined){
-        that.players.spawnAll();   
+    if (that.players != undefined) {
+        that.players.spawnAll(that);
     }
 }
 
 World.prototype.playerRoutine = function() {
     var that = this;
-    _.each(this.players.list, function(player) {
+    _.each(that.players.list, function(player) {
         if (player == false)
             return;
         switch (player.direction) {
@@ -62,7 +63,7 @@ World.prototype.playerRoutine = function() {
                 player.y += player.speed;
                 break;
         }
-        console.log(that.bmp);
+
         if (that.bmp[player.x / that.pixelReso] == undefined) {
             that.bmp[player.x / that.pixelReso] = [];
         }
@@ -88,59 +89,66 @@ World.prototype.playerRoutine = function() {
 
 World.prototype.serverRoutine = function() {
     countplayernotdead = 0;
-    if(this.players!=undefined){
-        countplayernotdead = this.players.countPlayerNotDead();
-    }
-    if(countplayernotdead == 1){
-        this.clearWorld();
-        if (countplayernotdead.id!=undefined) {            
-            if (_.size(this.players.list) > 1) {
-                countplayernotdead.score++;
+    that = this;
+    if (that.players != undefined) {
+        countplayernotdead = that.players.countPlayerNotDead();
+        if (countplayernotdead <= 1) {
+            if (countplayernotdead === 1 && _.size(that.players.list)>0) {
+                that.clearWorld();
             } 
-        }        
-    }else if (countplayernotdead.id!=0){
-	console.log(this.constructor);
-        this.playerRoutine();        
+            console.log(countplayernotdead);
+            if (countplayernotdead.id != undefined) {
+                if (_.size(that.players.list) > 1) {
+                    countplayernotdead.score++;
+                    
+                }
+            }
+            
+
+        }
+        that.playerRoutine();
     }
 
-    setTimeout(this.serverRoutine, 50);
+    setTimeout(function() {
+        that.serverRoutine()
+    }, 50);
 }
 
 World.prototype.initSocket = function() {
-    console.log(this.height);
+
     var that = this;
     that.io.configure('production', function() {
         that.io.set('log level', 1);
     });
-    that.io.sockets.on('connection', function(socket){       
-        
+    that.io.sockets.on('connection', function(socket) {
+
         socket.heartbeatTimeout = 5000;
         var player = new Player();
         console.log('Got connect!', player.id, player.name);
 
         socket.emit('caneva', that.getdata());
-        player.spawn();
+        player.spawn(that);
         that.players.list[player.id] = player;
 
         //  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
 
         socket.on('keydown', function(data) {
-            takePlayerFunction(data);
+            takePlayerFunction(data, that);
         });
 
         socket.on('touchup', function(data) {
-            takePlayerFunction(data,that);
+            takePlayerFunction(data, that);
         });
 
         socket.on('disconnect', function() {
             console.log('Got disconnect!', player.id, player.name);
-            var newplayers = {};
+            var newplayersList = {};
             _.each(that.players.list, function(p) {
                 if (p.id != player.id) {
-                    newplayers[p.id] = p;
+                    newplayersList[p.id] = p;
                 }
             });
-            that.players = newplayers.list;
+            that.players.list = newplayersList;
             that.io.sockets.emit('playerQuit', player);
             player = false;
         });
@@ -169,7 +177,7 @@ World.prototype.initSocket = function() {
 
 
 
-        function takePlayerFunction(data,that) {
+        function takePlayerFunction(data, that) {
             if (data.keyFunction != '') {
                 if (player.direction != "dead") {
                     if (_.contains(player.directionlist, data.keyFunction)) {
@@ -185,7 +193,7 @@ World.prototype.initSocket = function() {
                                         )
                                 ) {
                             player.direction = data.keyFunction;
-                           sendMessage(data.keyFunction);
+                            sendMessage(data.keyFunction);
                         }
                         return;
                     }
@@ -203,9 +211,9 @@ World.prototype.initSocket = function() {
         }
 
 
-    
+
     });
-    
+
 
 
 };

@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var world = require('./World');
+//var world = require('./World');
 var Player = function() {
     this.directionlist = ["left", "right", "up", "down"];
     this.id = makeid();
@@ -17,7 +17,7 @@ Player.prototype.kill = function() {
     this.direction = "dead";
 };
 
-Player.prototype.spawn = function() {
+Player.prototype.spawn = function(world) {
     this.direction = _.sample(this.directionlist);
     this.x = 50 + 5 * Math.floor((world.width - 100) / 5 * Math.random());
     this.y = 50 + 5 * Math.floor((world.height - 100) / 5 * Math.random());
