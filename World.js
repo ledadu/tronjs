@@ -129,10 +129,10 @@ World.prototype.initSocket = function(tcpPort) {
         that.players.list[player.id] = player;
 
         var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
-        bindSocketPlayerWorld.bindInput();
-        bindSocketPlayerWorld.bindDisconnect();
+        bindSocketPlayerWorld.bindInput();        
         bindSocketPlayerWorld.bindSendValue();
         bindSocketPlayerWorld.bindPrintDebug();
+        bindSocketPlayerWorld.bindDisconnect();
 
     });
     

@@ -10,16 +10,20 @@ module.exports = HttpServer;
 
 
 
-function handler(req, res) {
-    fs.readFile(__dirname + '/index.html',
+function handler(req, res) {    
+    if (req.url == '/') {
+        req.url = '/index.html';
+    }
+    
+    console.log(__dirname + '/public' + req.url);
+    fs.readFile(__dirname + '/public' + req.url,
             function(err, data) {
                 if (err) {
                     res.writeHead(500);
                     return res.end('Error loading index.html');
                 }
-                console.log(req.url);
+
                 res.writeHead(200);
                 res.end(data);
             });
-
 }

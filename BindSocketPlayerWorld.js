@@ -1,4 +1,4 @@
-//  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
+var _ = require('underscore');
 
 function BindSocketPlayerWorld(socket, world, player) {
     this.socket = socket;
@@ -58,6 +58,7 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
 
 
 BindSocketPlayerWorld.prototype.bindPrintDebug = function() {
+    var that = this;
     that.socket.on('printDebug', function(data) {
         console.log(data);
     });
@@ -65,6 +66,7 @@ BindSocketPlayerWorld.prototype.bindPrintDebug = function() {
 
 
 BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
+    var that = this;
     if (data.keyFunction != '') {
         if (that.player.direction != "dead") {
             if (_.contains(that.player.directionlist, data.keyFunction)) {
@@ -80,7 +82,7 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
                                 )
                         ) {
                     that.player.direction = data.keyFunction;
-                    that.socket.emit('message', message);
+                    that.socket.emit('message', data.keyFunction);
                 }
                 return;
             }
