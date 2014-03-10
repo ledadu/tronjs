@@ -92,23 +92,20 @@ World.prototype.serverRoutine = function() {
     that = this;
     if (that.players != undefined) {
         countplayernotdead = that.players.countPlayerNotDead();
-        if (countplayernotdead <= 1) {
-            if (countplayernotdead === 1 && _.size(that.players.list)>0) {
-                that.clearWorld();
-            } 
-            console.log(countplayernotdead);
-            if (countplayernotdead.id != undefined) {
-                if (_.size(that.players.list) > 1) {
-                    countplayernotdead.score++;
-                    
-                }
-            }
-            
 
+        if (countplayernotdead == 0) {
+            that.clearWorld();
+        } else
+        if (countplayernotdead.id != undefined) {
+            that.clearWorld();
+            if (_.size(that.players.list) > 1) {
+                countplayernotdead.score++;
+                console.log("++");
+            }
         }
+
         that.playerRoutine();
     }
-
     setTimeout(function() {
         that.serverRoutine()
     }, 50);

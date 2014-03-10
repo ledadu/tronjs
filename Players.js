@@ -33,7 +33,7 @@ Players.prototype.countPlayerNotDead = function () {
         return countplayernotdead;
     }else
     if(countplayernotdead==1){
-        return 1
+        return lastplayer;
     }else
     if(countplayernotdead==0){
         return 0;
