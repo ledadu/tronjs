@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var Player = require('./Player');
 var Players = require('./Players');
+var BindSocketPlayerWorld = require('./BindSocketPlayerWorld');
 
 
 var World = function(server) {
@@ -31,7 +32,7 @@ World.prototype.getdata = function() {
 World.prototype.restartWorld = function() {
     this.bmp = [];
     console.log("restartWorld");
-    that = this;
+    var that = this;
     that.io.sockets.emit('caneva', that.getdata());
     if (that.players != undefined) {
         that.players.spawnAll(that);
@@ -84,7 +85,7 @@ World.prototype.playersRoutine = function() {
 // routine for this world
 World.prototype.serverRoutine = function() {
     countplayernotdead = 0;
-    that = this;
+    var that = this;
     if (_.size(that.players.list) > 1) {
         countplayernotdead = that.players.countPlayerNotDead();
         if (countplayernotdead == 0) {
@@ -127,96 +128,15 @@ World.prototype.initSocket = function(tcpPort) {
         player.spawn(that);
         that.players.list[player.id] = player;
 
-
-        bindSocketEvent(socket);
+        var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
+        bindSocketPlayerWorld.bindInput();
+        bindSocketPlayerWorld.bindDisconnect();
+        bindSocketPlayerWorld.bindSendValue();
+        bindSocketPlayerWorld.bindPrintDebug();
 
     });
-
-
-    //  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
-
-    function bindSocketEvent(socket) {
-        socket.on('keydown', function(data) {
-            executePlayerFunction(data, that);
-        });
-
-        socket.on('touchup', function(data) {
-            executePlayerFunction(data, that);
-        });
-
-        socket.on('disconnect', function() {
-            console.log('Got disconnect!', player.id, player.name);
-            var newplayersList = {};
-            _.each(that.players.list, function(p) {
-                if (p.id != player.id) {
-                    newplayersList[p.id] = p;
-                }
-            });
-            that.players.list = newplayersList;
-            that.io.sockets.emit('playerQuit', player);
-            player = false;
-        });
-
-        socket.on('sendValue', function(data) {
-            console.log('sendValue!', data);
-            _.each(data, function(data) {
-                if (data.name == 'nickname') {
-                    oldplayerName = player.name;
-                    that.io.sockets.emit('playerQuit', player);
-
-                    player.name = data.value;
-                    if (that.players.list[player.id] != undefined) {
-                        that.players.list[player.id] = player;
-                    }
-                    that.io.sockets.emit('playerUpdate', player);
-
-                }
-            });
-
-        });
-
-        socket.on('printDebug', function(data) {
-            console.log(data);
-        });
-
-        function executePlayerFunction(data, that) {
-            if (data.keyFunction != '') {
-                if (player.direction != "dead") {
-                    if (_.contains(player.directionlist, data.keyFunction)) {
-                        if (
-                                (
-                                        (data.keyFunction == "left" || data.keyFunction == "right") &&
-                                        (player.direction == "up" || player.direction == "down")
-                                        )
-                                ||
-                                (
-                                        (data.keyFunction == "up" || data.keyFunction == "down") &&
-                                        (player.direction == "left" || player.direction == "right")
-                                        )
-                                ) {
-                            player.direction = data.keyFunction;
-                            sendMessage(data.keyFunction);
-                        }
-                        return;
-                    }
-
-                }
-                if (data.keyFunction == "clear") {
-                    console.log("clear Bmp");
-                    that.bmp = [];
-                    that.io.sockets.emit('caneva', that.getdata());
-                }
-            }
-        }
-
-        function sendMessage(message) {
-            socket.emit('message', message);
-        }
+    
     }
 
-
-};
-
 module.exports = World;
-
 
