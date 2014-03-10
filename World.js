@@ -36,15 +36,15 @@ World.prototype.getdata = function() {
 
 World.prototype.clearWorld = function() {
     this.bmp = [];
-  
-    this.io.sockets.emit('caneva', world);
-    if(this.players!=undefined){
-        this.players.spawnAll();   
+    that = this;
+    that.io.sockets.emit('caneva', that.getdata());
+    if(that.players!=undefined){
+        that.players.spawnAll();   
     }
 }
 
 World.prototype.playerRoutine = function() {
-    var world = this;
+    var that = this;
     _.each(this.players.list, function(player) {
         if (player == false)
             return;
@@ -62,48 +62,48 @@ World.prototype.playerRoutine = function() {
                 player.y += player.speed;
                 break;
         }
-        console.log(world.bmp);
-        if (world.bmp[player.x / world.pixelReso] == undefined) {
-            world.bmp[player.x / world.pixelReso] = [];
+        console.log(that.bmp);
+        if (that.bmp[player.x / that.pixelReso] == undefined) {
+            that.bmp[player.x / that.pixelReso] = [];
         }
         if (player.direction != "dead")
             if (
-                    player.x < 0 || player.x > world.width ||
-                    player.y < 0 || player.y > world.height ||
-                    world.bmp[player.x / world.pixelReso][player.y / world.pixelReso] != null
+                    player.x < 0 || player.x > that.width ||
+                    player.y < 0 || player.y > that.height ||
+                    that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] != null
                     ) {
                 player.kill();
-                this.io.sockets.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                that.io.sockets.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
             }
 
-        world.bmp[player.x / world.pixelReso][player.y / world.pixelReso] = player.color;
+        that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] = player.color;
 
         if (_.contains(player.directionlist, player.direction)) {
-            world.players.list[player.id] = player;
-            this.io.sockets.emit('playerUpdate', player);
+            that.players.list[player.id] = player;
+            that.io.sockets.emit('playerUpdate', player);
         }
     });
 }
 
-module.exports = World;
 
 World.prototype.serverRoutine = function() {
     countplayernotdead = 0;
     if(this.players!=undefined){
         countplayernotdead = this.players.countPlayerNotDead();
     }
-    if(countplayernotdead <= 1){
+    if(countplayernotdead == 1){
         this.clearWorld();
         if (countplayernotdead.id!=undefined) {            
             if (_.size(this.players.list) > 1) {
                 countplayernotdead.score++;
             } 
         }        
-    }else{
+    }else if (countplayernotdead.id!=0){
+	console.log(this.constructor);
         this.playerRoutine();        
     }
 
-    setTimeout(serverRoutine, 50);
+    setTimeout(this.serverRoutine, 50);
 }
 
 World.prototype.initSocket = function() {
@@ -210,7 +210,7 @@ World.prototype.initSocket = function() {
 
 };
 
-
+module.exports = World;
 
 
 function handler(req, res) {

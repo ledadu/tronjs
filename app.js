@@ -8,8 +8,7 @@ var World = require('./World');
 var numplayercount = 0;
 var world = new World();
 world.initSocket();
-
-
+world.serverRoutine();
 
 
 
