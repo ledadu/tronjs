@@ -108,18 +108,19 @@ World.prototype.serverRoutine = function() {
 
 World.prototype.initSocket = function() {
     console.log(this.height);
-    this.io.configure('production', function() {
-      //  this.io.set('log level', 1);
+    var that = this;
+    that.io.configure('production', function() {
+        that.io.set('log level', 1);
     });
-    this.io.sockets.on('connection', function(socket){       
+    that.io.sockets.on('connection', function(socket){       
         
         socket.heartbeatTimeout = 5000;
         var player = new Player();
         console.log('Got connect!', player.id, player.name);
 
-        socket.emit('caneva', this.getdata());
+        socket.emit('caneva', that.getdata());
         player.spawn();
-        this.players.list[player.id] = player;
+        that.players.list[player.id] = player;
 
         //  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
 
@@ -128,19 +129,19 @@ World.prototype.initSocket = function() {
         });
 
         socket.on('touchup', function(data) {
-            takePlayerFunction(data);
+            takePlayerFunction(data,that);
         });
 
         socket.on('disconnect', function() {
             console.log('Got disconnect!', player.id, player.name);
-            newplayers = {};
-            _.each(this.players.list, function(p) {
+            var newplayers = {};
+            _.each(that.players.list, function(p) {
                 if (p.id != player.id) {
                     newplayers[p.id] = p;
                 }
             });
-            this.players = newplayers.list;
-            this.io.sockets.emit('playerQuit', player);
+            that.players = newplayers.list;
+            that.io.sockets.emit('playerQuit', player);
             player = false;
         });
 
@@ -149,13 +150,13 @@ World.prototype.initSocket = function() {
             _.each(data, function(data) {
                 if (data.name == 'nickname') {
                     oldplayerName = player.name;
-                    this.io.sockets.emit('playerQuit', player);
+                    that.io.sockets.emit('playerQuit', player);
 
                     player.name = data.value;
-                    if (this.players.list[player.id] != undefined) {
-                        this.players.list[player.id] = player;
+                    if (that.players.list[player.id] != undefined) {
+                        that.players.list[player.id] = player;
                     }
-                    this.io.sockets.emit('playerUpdate', player);
+                    that.io.sockets.emit('playerUpdate', player);
 
                 }
             });
@@ -168,7 +169,7 @@ World.prototype.initSocket = function() {
 
 
 
-        function takePlayerFunction(data) {
+        function takePlayerFunction(data,that) {
             if (data.keyFunction != '') {
                 if (player.direction != "dead") {
                     if (_.contains(player.directionlist, data.keyFunction)) {
@@ -192,8 +193,8 @@ World.prototype.initSocket = function() {
                 }
                 if (data.keyFunction == "clear") {
                     console.log("clear Bmp");
-                    this.bmp = [];
-                    this.io.sockets.emit('caneva', this.getdata());
+                    that.bmp = [];
+                    that.io.sockets.emit('caneva', that.getdata());
                 }
             }
         }
