@@ -7,7 +7,7 @@ var World = require('./World');
 
 
 
-var numplayercount = 0;
+
 var httpServer = new HttpServer();
 var world = new World(httpServer.server);
 world.initSocket(8181);
@@ -44,6 +44,9 @@ world.serverRoutine();
  * mode rainbow
  idee malus
  * inversion commande
+  
+ 
+ ajout d'un mode superWorm, idem au bot, avec un worms cheaté piloté par un humain
  
  To do :
  * ajouter un lobby de connection

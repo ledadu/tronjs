@@ -85,7 +85,7 @@ World.prototype.playersRoutine = function() {
 World.prototype.serverRoutine = function() {
     countplayernotdead = 0;
     that = this;
-    if (that.players != undefined) {
+    if (_.size(that.players.list) >1) {
         countplayernotdead = that.players.countPlayerNotDead();
         if (countplayernotdead == 0) {
             that.clearWorld();
