@@ -4,6 +4,7 @@ var Players = require('./Players');
 
 
 var World = function(server) {
+    //construct
     this.width = 800;
     this.height = 400;
     this.tcpPort = 8080;
@@ -14,9 +15,7 @@ var World = function(server) {
     this.io = require('socket.io').listen(this.server);
 };
 
-
-
-
+//  export World attributes
 World.prototype.getdata = function() {
     var data = {
         width: this.width,
@@ -28,10 +27,10 @@ World.prototype.getdata = function() {
     return data;
 }
 
-
-World.prototype.clearWorld = function() {
+// clear world and spawn player
+World.prototype.restartWorld = function() {
     this.bmp = [];
-    console.log("clearWorld");
+    console.log("restartWorld");
     that = this;
     that.io.sockets.emit('caneva', that.getdata());
     if (that.players != undefined) {
@@ -39,6 +38,7 @@ World.prototype.clearWorld = function() {
     }
 }
 
+// routine for all player in this world
 World.prototype.playersRoutine = function() {
     var that = this;
     _.each(that.players.list, function(player) {
@@ -81,17 +81,17 @@ World.prototype.playersRoutine = function() {
     });
 }
 
-
+// routine for this world
 World.prototype.serverRoutine = function() {
     countplayernotdead = 0;
     that = this;
-    if (_.size(that.players.list) >1) {
+    if (_.size(that.players.list) > 1) {
         countplayernotdead = that.players.countPlayerNotDead();
         if (countplayernotdead == 0) {
-            that.clearWorld();
+            that.restartWorld();
         } else
         if (countplayernotdead.id != undefined) {
-            that.clearWorld();
+            that.restartWorld();
             if (_.size(that.players.list) > 1) {
                 countplayernotdead.score++;
             }
@@ -104,33 +104,44 @@ World.prototype.serverRoutine = function() {
     }, 50);
 }
 
+
+// Socket 
 World.prototype.initSocket = function(tcpPort) {
     var that = this;
-    if(tcpPort!=undefined){
+    var player ;
+    if (tcpPort != undefined) {
         that.tcpPort = tcpPort;
     }
     that.server.listen(that.tcpPort);
     that.io.configure('production', function() {
         that.io.set('log level', 1);
     });
+    
     that.io.sockets.on('connection', function(socket) {
-
+        player = new Player();
         socket.heartbeatTimeout = 5000;
-        var player = new Player();
+        
         console.log('Got connect!', player.id, player.name);
 
         socket.emit('caneva', that.getdata());
         player.spawn(that);
         that.players.list[player.id] = player;
 
-        //  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
 
+        bindSocketEvent(socket);
+
+    });
+
+
+    //  socket.on  socket.on socket.on socket.on socket.on socket.on socket.on
+
+    function bindSocketEvent(socket) {
         socket.on('keydown', function(data) {
-            takePlayerFunction(data, that);
+            executePlayerFunction(data, that);
         });
 
         socket.on('touchup', function(data) {
-            takePlayerFunction(data, that);
+            executePlayerFunction(data, that);
         });
 
         socket.on('disconnect', function() {
@@ -168,9 +179,7 @@ World.prototype.initSocket = function(tcpPort) {
             console.log(data);
         });
 
-
-
-        function takePlayerFunction(data, that) {
+        function executePlayerFunction(data, that) {
             if (data.keyFunction != '') {
                 if (player.direction != "dead") {
                     if (_.contains(player.directionlist, data.keyFunction)) {
@@ -199,14 +208,11 @@ World.prototype.initSocket = function(tcpPort) {
                 }
             }
         }
+
         function sendMessage(message) {
             socket.emit('message', message);
         }
-
-
-
-    });
-
+    }
 
 
 };

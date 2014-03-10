@@ -1,6 +1,7 @@
 var _ = require('underscore');
 
 var Player = function() {
+    //construct
     this.directionlist = ["left", "right", "up", "down"];
     this.id = makeid();
     this.name = this.id;

@@ -1,6 +1,7 @@
 var fs = require('fs');
 
 var HttpServer = function() {
+    //construct
     this.server = require('http').createServer(handler);
 };
 

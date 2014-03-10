@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var Players = function() {
+    //construct
     this.list={};   //list of Player
 }
 
