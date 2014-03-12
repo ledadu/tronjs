@@ -13,7 +13,7 @@ var World = function(server) {
     this.pixelReso = 5;
     this.players = new Players();
     this.server = server;
-    this.io = require('socket.io').listen(this.server);
+    this.io = require('socket.io').listen(server);
 };
 
 //  export World attributes
