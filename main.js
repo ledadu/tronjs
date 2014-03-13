@@ -8,10 +8,11 @@ var World = require('./World');
 
 
 
-var httpServer = new HttpServer();
-var world = new World(httpServer.server);
+var httpServer = new HttpServer(8080);
 httpServer.configure();
-world.initSocket(8181);
+var world = new World(httpServer.server);
+
+world.initSocket(8585);
 world.serverRoutine();
 
 
