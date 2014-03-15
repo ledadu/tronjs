@@ -1,4 +1,4 @@
-//var fs = require('fs');
+var fs = require('fs');
 
 
 var Express = require('express');
@@ -24,18 +24,18 @@ HttpServer.prototype.configure = function() {
       
 
       
-      this.app.get('/world/:world?', function(req, res){
-          console.log(req.route.params);
-        res.sendfile(__dirname + '/public/index.html');
+      this.app.get('/world/:worldId?', function(req, res){
+          fs.readFile(__dirname + '/templates/world.html.t', function (err, data) {
+            if (err) throw err;
+                //console.log(data);
+                res.status(200).set('Content-Type', 'text/html').send(data);
+          });
+          //console.log(req.route.params);
+        //res.sendfile(__dirname + '/public/index.html');
       });
-//  this.app.set('views', __dirname + '/views');
-//  that.server.set('view engine', 'jade');
-//  this.app.use(Express.favicon());
-//  that.server.use(Express.logger('dev'));
+
     this.app.use(Express.static(__dirname + '/public'));
-//  that.server.use(Express.bodyParser());
-//  that.server.use(Express.methodOverride());
-//  that.server.use(that.server.router);
+
 
    // that.server.listen(that.tcpPort);
     that.io.configure('production', function() {
