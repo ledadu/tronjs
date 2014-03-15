@@ -4,16 +4,15 @@ var Players = require('./Players');
 var BindSocketPlayerWorld = require('./BindSocketPlayerWorld');
 
 
-var World = function(server) {
+var World = function(io) {
     //construct
     this.width = 800;
     this.height = 400;
-    this.tcpPort = 8080;
+    this.socket = null;
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
-    this.server = server;
-    this.io = require('socket.io').listen(server);
+    this.io = io;
 };
 
 //  export World attributes
@@ -33,7 +32,7 @@ World.prototype.restartWorld = function() {
     this.bmp = [];
     console.log("restartWorld");
     var that = this;
-    that.io.sockets.emit('caneva', that.getdata());
+    that.socket.emit('caneva', that.getdata());
     if (that.players != undefined) {
         that.players.spawnAll(that);
     }
@@ -70,14 +69,14 @@ World.prototype.playersRoutine = function() {
                     that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] != null
                     ) {
                 player.kill();
-                that.io.sockets.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                that.socket.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
             }
 
         that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] = player.color;
 
         if (_.contains(player.directionlist, player.direction)) {
             that.players.list[player.id] = player;
-            that.io.sockets.emit('playerUpdate', player);
+            that.socket.emit('playerUpdate', player);
         }
     });
 }
@@ -107,22 +106,17 @@ World.prototype.serverRoutine = function() {
 
 
 // Socket 
-World.prototype.initSocket = function(tcpPort) {
+World.prototype.initSocket = function(namespace) {
     var that = this;
     var player ;
-    if (tcpPort != undefined) {
-        that.tcpPort = tcpPort;
-    }
-    that.server.listen(that.tcpPort);
-    that.io.configure('production', function() {
-        that.io.set('log level', 1);
-    });
+   
     
-    that.io.sockets
-		//.of(namespace)
+    that.io     //.sockets
+		.of(namespace)
 		.on('connection', function(socket) {
+        that.socket = socket;
         player = new Player();
-        socket.heartbeatTimeout = 5000;
+                socket.heartbeatTimeout = 5000;
         
         console.log('Got connect!', player.id, player.name);
 

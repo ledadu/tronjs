@@ -28,7 +28,7 @@ BindSocketPlayerWorld.prototype.bindDisconnect = function() {
             }
         });
         that.world.players.list = newplayersList;
-        that.world.io.sockets.emit('playerQuit', that.player);
+        that.world.socket.emit('playerQuit', that.player);
         that.player = false;
     });
 }
@@ -41,13 +41,13 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
         _.each(data, function(data) {
             if (data.name == 'nickname') {
                 oldplayerName = that.player.name;
-                that.world.io.sockets.emit('playerQuit', that.player);
+                that.world.socket.emit('playerQuit', that.player);
 
                 that.player.name = data.value;
                 if (that.world.players.list[that.player.id] != undefined) {
                     that.world.players.list[that.player.id] = that.player;
                 }
-                that.world.io.sockets.emit('playerUpdate', that.player);
+                that.world.socket.emit('playerUpdate', that.player);
             }
         });
 
@@ -91,7 +91,7 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
         if (data.keyFunction == "clear") {
             console.log("clear Bmp");
             that.world.bmp = [];
-            that.world.io.sockets.emit('caneva', that.world.getdata());
+            that.world.socket.emit('caneva', that.world.getdata());
         }
     }
 }

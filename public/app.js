@@ -171,7 +171,7 @@ function bindChangeName() {
 }
 
 function initSocket() {
-    socket = io.connect('http://'+ location.host),
+    socket = io.connect('http://'+ location.host + '/world1'),
             text = $('#text');
 
     socket.on('connect', function() {

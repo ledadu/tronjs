@@ -8,6 +8,7 @@ var HttpServer = function(tcport) {
     this.app = new Express();
     this.server = require('http').createServer(this.app);    
     this.server.listen(tcport);
+    this.io = require('socket.io').listen(this.server);
 };
 
 
@@ -23,8 +24,8 @@ HttpServer.prototype.configure = function() {
       
 
       
-      this.app.get('/user/:id?', function(req, res){
-          console.log(req.route);
+      this.app.get('/world/:world?', function(req, res){
+          console.log(req.route.params);
         res.sendfile(__dirname + '/public/index.html');
       });
 //  this.app.set('views', __dirname + '/views');
@@ -36,6 +37,11 @@ HttpServer.prototype.configure = function() {
 //  that.server.use(Express.methodOverride());
 //  that.server.use(that.server.router);
 
+   // that.server.listen(that.tcpPort);
+    that.io.configure('production', function() {
+        that.io.set('log level', 1);
+    });
+    
 };
 
 
