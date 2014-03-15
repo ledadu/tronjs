@@ -8,7 +8,7 @@ var World = require('./World');
 
 
 
-var httpServer = new HttpServer(8080);
+var httpServer = new HttpServer(8181);
 httpServer.configure();
 var world = new World(httpServer.server);
 

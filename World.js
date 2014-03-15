@@ -118,7 +118,9 @@ World.prototype.initSocket = function(tcpPort) {
         that.io.set('log level', 1);
     });
     
-    that.io.sockets.on('connection', function(socket) {
+    that.io.sockets
+		//.of(namespace)
+		.on('connection', function(socket) {
         player = new Player();
         socket.heartbeatTimeout = 5000;
         

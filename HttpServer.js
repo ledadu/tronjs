@@ -23,10 +23,10 @@ HttpServer.prototype.configure = function() {
       
 
       
-//      this.app.get('/user/:id?', function(req, res){
-//          console.log(req.route);
-//        res.sendfile(__dirname + '/public/index.html');
-//      });
+      this.app.get('/user/:id?', function(req, res){
+          console.log(req.route);
+        res.sendfile(__dirname + '/public/index.html');
+      });
 //  this.app.set('views', __dirname + '/views');
 //  that.server.set('view engine', 'jade');
 //  this.app.use(Express.favicon());
