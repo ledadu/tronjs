@@ -12,7 +12,7 @@ var World = function(io) {
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
-    this.io = io;
+    this.ioNamespace = io;
 };
 
 //  export World attributes
@@ -32,7 +32,9 @@ World.prototype.restartWorld = function() {
     this.bmp = [];
     console.log("restartWorld");
     var that = this;
-    that.socket.emit('caneva', that.getdata());
+//    that.socket.broadcast.emit('caneva', that.getdata());
+//    that.socket.emit('caneva', that.getdata());
+    that.ioNamespace.emit('caneva', that.getdata());
     if (that.players != undefined) {
         that.players.spawnAll(that);
     }
@@ -69,14 +71,18 @@ World.prototype.playersRoutine = function() {
                     that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] != null
                     ) {
                 player.kill();
-                that.socket.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+//                that.socket.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+//                that.socket.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
             }
 
         that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] = player.color;
 
         if (_.contains(player.directionlist, player.direction)) {
             that.players.list[player.id] = player;
-            that.socket.emit('playerUpdate', player);
+//            that.socket.broadcast.emit('playerUpdate', player);
+//            that.socket.emit('playerUpdate', player);
+            that.ioNamespace.emit('playerUpdate', player);
         }
     });
 }
@@ -106,33 +112,33 @@ World.prototype.serverRoutine = function() {
 
 
 // Socket 
-World.prototype.initSocket = function(namespace) {
+World.prototype.initSocket = function() {
     var that = this;
-    var player ;
-   
-    
-    that.io     //.sockets
-		.of(namespace)
-		.on('connection', function(socket) {
-        that.socket = socket;
-        player = new Player();
+    var player;
+
+
+    that.ioNamespace     //.sockets
+            
+            .on('connection', function(socket) {
+                that.socket = socket;
+                player = new Player();
                 socket.heartbeatTimeout = 5000;
-        
-        console.log('Got connect!', player.id, player.name);
 
-        socket.emit('caneva', that.getdata());
-        player.spawn(that);
-        that.players.list[player.id] = player;
+                console.log('Got connect!', player.id, player.name);
 
-        var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
-        bindSocketPlayerWorld.bindInput();        
-        bindSocketPlayerWorld.bindSendValue();
-        bindSocketPlayerWorld.bindPrintDebug();
-        bindSocketPlayerWorld.bindDisconnect();
+                socket.emit('caneva', that.getdata());
+                player.spawn(that);
+                that.players.list[player.id] = player;
 
-    });
-    
-    }
+                var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
+                bindSocketPlayerWorld.bindInput();
+                bindSocketPlayerWorld.bindSendValue();
+                bindSocketPlayerWorld.bindPrintDebug();
+                bindSocketPlayerWorld.bindDisconnect();
+
+            });
+
+}
 
 module.exports = World;
 
