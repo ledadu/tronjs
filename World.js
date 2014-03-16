@@ -118,7 +118,7 @@ World.prototype.initSocket = function() {
 
 
     that.ioNamespace     //.sockets
-            
+
             .on('connection', function(socket) {
                 that.socket = socket;
                 player = new Player();
@@ -138,6 +138,7 @@ World.prototype.initSocket = function() {
 
             });
 
+    return this;
 }
 
 module.exports = World;
