@@ -9,7 +9,6 @@ var World = function(io,idWorld) {
     this.id = idWorld;
     this.width = 800;
     this.height = 400;
-    this.socket = null;
     this.bmp = [];
     this.pixelReso = 5;
     this.players = new Players();
@@ -33,8 +32,6 @@ World.prototype.restartWorld = function() {
     this.bmp = [];
     console.log("restartWorld");
     var that = this;
-//    that.socket.broadcast.emit('caneva', that.getdata());
-//    that.socket.emit('caneva', that.getdata());
     that.ioNamespace.emit('caneva', that.getdata());
     if (that.players != undefined) {
         that.players.spawnAll(that);
@@ -72,8 +69,8 @@ World.prototype.playersRoutine = function() {
                     that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] != null
                     ) {
                 player.kill();
-//                that.socket.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-//                that.socket.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+//                socketplayer.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+//                socketplayer.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
                 that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
             }
 
@@ -81,8 +78,8 @@ World.prototype.playersRoutine = function() {
 
         if (_.contains(player.directionlist, player.direction)) {
             that.players.list[player.id] = player;
-//            that.socket.broadcast.emit('playerUpdate', player);
-//            that.socket.emit('playerUpdate', player);
+//            socketplayer.broadcast.emit('playerUpdate', player);
+//            socketplayer.emit('playerUpdate', player);
             that.ioNamespace.emit('playerUpdate', player);
         }
     });
@@ -121,7 +118,6 @@ World.prototype.initSocket = function() {
     that.ioNamespace     //.sockets
 
             .on('connection', function(socket) {
-                that.socket = socket;
                 player = new Player();
                 socket.heartbeatTimeout = 5000;
 
