@@ -11,11 +11,12 @@ var World = require('./World');
 var httpServer = new HttpServer(8181);
 httpServer.configure();
 
-var world1 = new World(httpServer.io.of('/world1'));
-world1.initSocket().serverRoutine();
+var worlds ={};
 
-var world2 = new World(httpServer.io.of('/world2'));
-world2.initSocket().serverRoutine();
+for (idWorld=1;idWorld<33;idWorld++){
+    var world1 = new World(httpServer.io.of('/world'+idWorld));
+    world1.initSocket().serverRoutine();
+    }
 
 
 /*
