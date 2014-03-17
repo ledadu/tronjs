@@ -9,14 +9,19 @@ var World = require('./World');
 
 
 var httpServer = new HttpServer(8181);
-httpServer.configure();
 
-var worlds ={};
 
-for (idWorld=1;idWorld<33;idWorld++){
-    var world1 = new World(httpServer.io.of('/world'+idWorld));
-    world1.initSocket().serverRoutine();
-    }
+var worlds = new Array();
+
+for (idWorld = 1; idWorld < 33; idWorld++) {
+    worlds[idWorld] = new World(httpServer.io.of('/world' + idWorld),idWorld);
+}
+
+httpServer.configure({worlds:worlds});
+
+for (idWorld = 1; idWorld < 33; idWorld++) {
+    worlds[idWorld].initSocket().serverRoutine();
+}
 
 
 /*
@@ -48,7 +53,7 @@ for (idWorld=1;idWorld<33;idWorld++){
  * mode rainbow
  idee malus
  * inversion commande
-  
+ 
  
  ajout d'un mode superWorm, idem au bot, avec un worms cheaté piloté par un humain
  

@@ -1,4 +1,5 @@
 var fs = require('fs');
+var _ = require('underscore');
 var Handlebars = require('handlebars');
 
 
@@ -13,32 +14,51 @@ var HttpServer = function(tcport) {
 };
 
 
-HttpServer.prototype.configure = function() {
+HttpServer.prototype.configure = function(param) {
     var that = this;
-
-    this.app.get('/world/:worldId?', function(req, res) {
-        fs.readFile(__dirname + '/templates/world.html.t', function(err, template_source) {
-            if (err) {
-                throw err;
-            }
-            var template = Handlebars.compile(template_source.toString());
-            var template_data = req.route.params;
-            var template_result = template(template_data);
-            res.status(200).set('Content-Type', 'text/html').send(template_result);
-        });
-
-        //console.log();
-        //res.sendfile(__dirname + '/public/index.html');
-    });
-
+    that.configureLobbyPage(param);
+    that.configureWorldPage();
     this.app.use(Express.static(__dirname + '/public'));
-
 
     that.io.configure('production', function() {
         that.io.set('log level', 1);
     });
-
 };
 
+HttpServer.prototype.configureLobbyPage = function(param) {
+    var that = this;
+    this.app.get('/', function(req, res) {
+        var ulListHtml = '<ul>';
+        _.each(param.worlds, function(world) {
+            ulListHtml += '<li><a href=/world/' + world.id + '>room' + world.id + '</a></li>'
+        });
+        ulListHtml += '</ul>';
+
+        var template_data = {listRoom: ulListHtml};
+        that.sendTemplate(template_data, 'lobby.html', res)
+        //res.sendfile(__dirname + '/public/index.html');
+    });
+}
+
+HttpServer.prototype.configureWorldPage = function(param) {
+     var that = this;
+     this.app.get('/world/:worldId?', function(req, res) {
+        var template_data = req.route.params;
+        that.sendTemplate(template_data, 'world.html', res)
+    });
+}
+
+HttpServer.prototype.sendTemplate = function(template_data, templateName, response) {
+    fs.readFile(__dirname + '/templates/' + templateName + '.t', function(err, template_source) {
+        if (err) {
+            throw err;
+        }
+        var template = Handlebars.compile(template_source.toString());
+        response.status(200).set('Content-Type', 'text/html').send(
+                template(template_data)
+                );
+    })
+            ;
+}
 
 module.exports = HttpServer;

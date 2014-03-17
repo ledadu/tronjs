@@ -4,8 +4,9 @@ var Players = require('./Players');
 var BindSocketPlayerWorld = require('./BindSocketPlayerWorld');
 
 
-var World = function(io) {
+var World = function(io,idWorld) {
     //construct
+    this.id = idWorld;
     this.width = 800;
     this.height = 400;
     this.socket = null;
