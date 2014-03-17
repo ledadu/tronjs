@@ -76,7 +76,7 @@ World.prototype.playersRoutine = function() {
                 that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
             }
 
-        that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] = player.color;
+        that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] = {playerid :player.id ,color:player.color};
 
         if (_.contains(player.directionlist, player.direction)) {
             that.players.list[player.id] = player;

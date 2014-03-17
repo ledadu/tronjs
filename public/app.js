@@ -91,9 +91,9 @@ function initCanvas(world) {
 
     $.each(world.bmp, function(x, cc) {
         if (cc != null) {
-            $.each(cc, function(y, color) {
-                if (x != null && y != null && color != null) {
-                    App.line(x * world.pixelReso, y * world.pixelReso, x * world.pixelReso, y * world.pixelReso, color);
+            $.each(cc, function(y, pixel) {
+                if (x != null && y != null && pixel != null) {
+                    App.line(x * world.pixelReso, y * world.pixelReso, x * world.pixelReso, y * world.pixelReso, pixel.color);
                 }
             });
         }
