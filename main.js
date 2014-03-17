@@ -14,14 +14,14 @@ var httpServer = new HttpServer(8181);
 var worlds = new Array();
 
 for (idWorld = 1; idWorld < 33; idWorld++) {
-    worlds[idWorld] = new World(httpServer.io.of('/world' + idWorld),idWorld);
+    worlds.push( new World(httpServer.io.of('/world' + idWorld),idWorld) );
 }
 
 httpServer.configure({worlds:worlds});
 
-for (idWorld = 1; idWorld < 33; idWorld++) {
-    worlds[idWorld].initSocket().serverRoutine();
-}
+_.each(worlds,function(world){
+    world.initSocket().serverRoutine();
+})
 
 
 /*
