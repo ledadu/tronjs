@@ -8,7 +8,7 @@
             var worldId = {{worldId}};
         </script>
 
-        <script src="/app.js"></script>  
+        <script src="/world.js"></script>  
     </head>
     <body>
         <div id="text"></div>

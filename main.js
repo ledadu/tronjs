@@ -5,9 +5,11 @@ var _ = require('underscore');
 var HttpServer = require('./HttpServer');
 var World = require('./World');
 var Lobby = require('./Lobby');
+var CompilePublicJs = require('./CompilePublicJs');
 
-
-
+var compilePublicJs = new CompilePublicJs();
+compilePublicJs.addFolderSource('./publicJsSource/world');
+compilePublicJs.compileUglifyJs('./public/');
 
 var httpServer = new HttpServer(8181);
 
