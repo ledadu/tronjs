@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-function BindSocketLobby(socket) {
+function BindSocketLobby(socket,lobby) {
     this.socket = socket;
 }
 
@@ -9,7 +9,7 @@ function BindSocketLobby(socket) {
 BindSocketLobby.prototype.bindDisconnect = function() {
     var that = this;
     that.socket.on('disconnect', function() {
-        console.log('World disconnect!', socket);
+        console.log('Lobby disconnect!', socket);
        
     });
 }

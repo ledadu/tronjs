@@ -17,7 +17,7 @@ for (idWorld = 1; idWorld < 33; idWorld++) {
     worlds.push( new World(httpServer.io.of('/world' + idWorld),idWorld) );
 }
 
-var lobby = new Lobby(worlds);
+var lobby = new Lobby( httpServer.io.of('/lobby') , worlds );
 
 httpServer.configure({worlds:lobby.worlds});
 
@@ -25,6 +25,7 @@ _.each(worlds,function(world){
     world.initSocket().serverRoutine();
 })
 
+lobby.initSocket();
 
 
 /*
