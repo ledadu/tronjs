@@ -14,8 +14,15 @@
         <form class="sendValue">
             name <input name="nickname"/> <button >Change name</button>
         </form>
-
-    {{{listRoom}}}
+	  <ul>
+	    {{#worlds}}
+             <li>
+		<a href=/world/{{id}}>room{{id}}</a>
+		<div class="gameMode">{{gameMode}}</div>
+		<div class="nbPlayers">{{nbPlayers}}</div>
+	    </li>
+	    {{/worlds}}
+	  </ul>
 
     </body>
 </html>

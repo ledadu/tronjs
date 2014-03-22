@@ -28,13 +28,16 @@ HttpServer.prototype.configure = function(param) {
 HttpServer.prototype.configureLobbyPage = function(param) {
     var that = this;
     this.app.get('/', function(req, res) {
-        var ulListHtml = '<ul>';
+        var template_data = {worlds:[]};
         _.each(param.worlds, function(world) {
-            ulListHtml += '<li><a href=/world/' + world.id + '>room' + world.id + '</a> <div class="gameMode">' + world.gameMode + '</div></li>'
+		var worldData = {};
+		worldData.id=world.id;
+		worldData.gameMode = world.gameMode;
+		worldData.players = world.players.list;
+		worldData.nbPlayers = _.keys(world.players.list).length;
+		template_data.worlds.push(worldData);
         });
-        ulListHtml += '</ul>';
 
-        var template_data = {listRoom: ulListHtml};
         that.sendTemplate(template_data, 'lobby.html', res)
         //res.sendfile(__dirname + '/public/index.html');
     });
