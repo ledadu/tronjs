@@ -4,12 +4,12 @@ var _ = require('underscore');
 
 var HttpServer = require('./HttpServer');
 var World = require('./World');
+var Lobby = require('./Lobby');
 
 
 
 
 var httpServer = new HttpServer(8181);
-
 
 var worlds = new Array();
 
@@ -17,11 +17,14 @@ for (idWorld = 1; idWorld < 33; idWorld++) {
     worlds.push( new World(httpServer.io.of('/world' + idWorld),idWorld) );
 }
 
-httpServer.configure({worlds:worlds});
+var lobby = new Lobby(worlds);
+
+httpServer.configure({worlds:lobby.worlds});
 
 _.each(worlds,function(world){
     world.initSocket().serverRoutine();
 })
+
 
 
 /*

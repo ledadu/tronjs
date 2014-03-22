@@ -30,7 +30,7 @@ HttpServer.prototype.configureLobbyPage = function(param) {
     this.app.get('/', function(req, res) {
         var ulListHtml = '<ul>';
         _.each(param.worlds, function(world) {
-            ulListHtml += '<li><a href=/world/' + world.id + '>room' + world.id + '</a></li>'
+            ulListHtml += '<li><a href=/world/' + world.id + '>room' + world.id + '</a> <div class="gameMode">' + world.gameMode + '</div></li>'
         });
         ulListHtml += '</ul>';
 

@@ -13,6 +13,7 @@ var World = function(io,idWorld) {
     this.pixelReso = 5;
     this.players = new Players();
     this.ioNamespace = io;
+    this.gameMode = "DM"
 };
 
 //  export World attributes
@@ -103,6 +104,9 @@ World.prototype.serverRoutine = function() {
 
         that.playersRoutine();
     }
+    
+
+        
     setTimeout(function() {
         that.serverRoutine()
     }, 50);
@@ -132,8 +136,11 @@ World.prototype.initSocket = function() {
                 bindSocketPlayerWorld.bindSendValue();
                 bindSocketPlayerWorld.bindPrintDebug();
                 bindSocketPlayerWorld.bindDisconnect();
-
+        
             });
+
+
+       
 
     return this;
 }
