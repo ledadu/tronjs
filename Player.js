@@ -1,8 +1,10 @@
 var _ = require('underscore');
+var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
 var Player = function() {
     //construct
+ EventEmitter.call(this);
     this.directionlist = ["left", "right", "up", "down"];
     this.id = makeid();
     this.name = this.id;
@@ -15,7 +17,8 @@ var Player = function() {
     //construct
 }
 
-Player.prototype = new EventEmitter();
+//Player.prototype = new EventEmitter();
+util.inherits(Player, EventEmitter);
 
 Player.prototype.kill = function() {
     this.direction = "dead";
