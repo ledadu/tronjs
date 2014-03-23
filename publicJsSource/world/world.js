@@ -7,6 +7,7 @@ var keyFunctions = {
     27: "clear",
 }
 
+var world ;
 var players = {};
 var screenMessages = [];
 
@@ -105,7 +106,7 @@ App.line = function(x1, y1, x2, y2, color) {
     App.ctx.beginPath();
     App.ctx.fillStyle = "solid";
     App.ctx.lineCap = "round";
-    App.ctx.lineWidth = 6;
+    App.ctx.lineWidth = world.pixelReso + 1;
     App.ctx.strokeStyle = color;
     App.ctx.moveTo(x1, y1);
     App.ctx.lineTo(x2 + 0.01, y2 + 0.01);
@@ -139,7 +140,7 @@ function refreshLayer() {
     App.ctx2.fillStyle = "rgba(0, 0, 0, 0.5)";
     //show player neme		
     $.each(players, function(playerName, player) {
-        App.ctx2.fillText(player.name + '(' + player.score + ')', player.x, player.y);
+        App.ctx2.fillText(player.name + '(' + player.score + ')', player.x * world.pixelReso, player.y * world.pixelReso);
     });
     // show screen message
 
@@ -188,13 +189,14 @@ function initSocket() {
         text.html('disconnected');
     });
 
-    socket.on('caneva', function(world) {
-        players = {};
+    socket.on('caneva', function(worldObj) {
+        world = worldObj;
+	players = {};
         initCanvas(world);
     });
 
     socket.on('playerUpdate', function(player) {
-        App.line(player.x, player.y, player.x, player.y, '#' + player.color);
+        App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
         players[player.id] = player;
         refreshLayer();
     });

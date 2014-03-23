@@ -45,29 +45,31 @@ World.prototype.playersRoutine = function() {
     _.each(that.players.list, function(player) {
         if (player == false)
             return;
+	player.step++;
+	
         switch (player.direction) {
             case "right":
-                player.x += player.speed;
+                player.x ++;
                 break;
             case "left":
-                player.x -= player.speed;
+                player.x --;
                 break;
             case "up":
-                player.y -= player.speed;
+                player.y --;
                 break;
             case "down":
-                player.y += player.speed;
+                player.y ++;
                 break;
         }
 
-        if (that.bmp[player.x / that.pixelReso] == undefined) {
-            that.bmp[player.x / that.pixelReso] = [];
+        if (that.bmp[player.x] == undefined) {
+            that.bmp[player.x] = [];
         }
         if (player.direction != "dead")
             if (
-                    player.x < 0 || player.x > that.width ||
-                    player.y < 0 || player.y > that.height ||
-                    that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] != null
+                    player.x < 0 || player.x * that.pixelReso > that.width ||
+                    player.y < 0 || player.y * that.pixelReso > that.height ||
+                    that.bmp[player.x][player.y] != null
                     ) {
                 player.kill();
 //                socketplayer.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
@@ -75,7 +77,7 @@ World.prototype.playersRoutine = function() {
                 that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
             }
 
-        that.bmp[player.x / that.pixelReso][player.y / that.pixelReso] = {playerid :player.id ,color:player.color};
+        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
 
         if (_.contains(player.directionlist, player.direction)) {
             that.players.list[player.id] = player;
