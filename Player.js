@@ -23,7 +23,7 @@ util.inherits(Player, EventEmitter);
 Player.prototype.kill = function() {
     this.direction = "dead";
     console.log("kill player");
-    this.emit('playerMove');
+    this.emit('playerMove',this);
 };
 
 Player.prototype.spawn = function(world) {
