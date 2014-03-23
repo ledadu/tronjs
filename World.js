@@ -123,6 +123,9 @@ World.prototype.initSocket = function() {
 
             .on('connection', function(socket) {
                 player = new Player();
+		player.on('playerMove', function() {
+			console.log('module a is ready');
+		});
                 socket.heartbeatTimeout = 5000;
 
                 console.log('Got connect!', player.id, player.name);

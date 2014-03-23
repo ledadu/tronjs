@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var EventEmitter = require('events').EventEmitter;
 
 var Player = function() {
     //construct
@@ -14,8 +15,12 @@ var Player = function() {
     //construct
 }
 
+Player.prototype = new EventEmitter();
+
 Player.prototype.kill = function() {
     this.direction = "dead";
+    console.log("kill player");
+    this.emit('playerMove');
 };
 
 Player.prototype.spawn = function(world) {
