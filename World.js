@@ -46,45 +46,47 @@ World.prototype.playersRoutine = function() {
         if (player == false)
             return;
 	player.step++;
+	if(player.step>player.speedStep){	
+        	switch (player.direction) {
+	            case "right":
+        	        player.x ++;
+	                break;
+	            case "left":
+	                player.x --;
+	                break;
+	            case "up":
+	                player.y --;
+	                break;
+	            case "down":
+	                player.y ++;
+	                break;
+	        }
+		player.step=0;
 	
-        switch (player.direction) {
-            case "right":
-                player.x ++;
-                break;
-            case "left":
-                player.x --;
-                break;
-            case "up":
-                player.y --;
-                break;
-            case "down":
-                player.y ++;
-                break;
-        }
+	        if (that.bmp[player.x] == undefined) {
+        	    that.bmp[player.x] = [];
+	        }
+	        if (player.direction != "dead")
+        	    if (
+	                    player.x < 0 || player.x * that.pixelReso > that.width ||
+	                    player.y < 0 || player.y * that.pixelReso > that.height ||
+	                    that.bmp[player.x][player.y] != null
+	                    ) {
+	                player.kill();
+	//                socketplayer.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+	//                socketplayer.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+	                that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+	            }
 
-        if (that.bmp[player.x] == undefined) {
-            that.bmp[player.x] = [];
-        }
-        if (player.direction != "dead")
-            if (
-                    player.x < 0 || player.x * that.pixelReso > that.width ||
-                    player.y < 0 || player.y * that.pixelReso > that.height ||
-                    that.bmp[player.x][player.y] != null
-                    ) {
-                player.kill();
-//                socketplayer.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-//                socketplayer.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-                that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-            }
+	        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
 
-        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
-
-        if (_.contains(player.directionlist, player.direction)) {
-            that.players.list[player.id] = player;
-//            socketplayer.broadcast.emit('playerUpdate', player);
-//            socketplayer.emit('playerUpdate', player);
-            that.ioNamespace.emit('playerUpdate', player);
-        }
+	        if (_.contains(player.directionlist, player.direction)) {
+	            that.players.list[player.id] = player;
+	//            socketplayer.broadcast.emit('playerUpdate', player);
+	//            socketplayer.emit('playerUpdate', player);
+	            that.ioNamespace.emit('playerUpdate', player);
+	        }
+	}
     });
 }
 
@@ -111,7 +113,7 @@ World.prototype.serverRoutine = function() {
         
     setTimeout(function() {
         that.serverRoutine()
-    }, 50);
+    }, 5);
 }
 
 
@@ -125,6 +127,7 @@ World.prototype.initSocket = function() {
 
             .on('connection', function(socket) {
                 player = new Player();
+		player.speedStep = that.id;
 		player.on('playerMove', function(ppp) {
 			console.log('playerMove',ppp.name);
 		});
