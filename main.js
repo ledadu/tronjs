@@ -29,8 +29,10 @@ _.each(worlds,function(world){
 
 lobby.initSocket();
 
-var Model_test = require('./model/test.js');
-var test = new Model_test();
+var Model_User = require('./model/User.js');
+var user = new Model_User();
+user.load();
+
 
 
 /*

@@ -1,7 +1,7 @@
 var extend = require('extend');
 
 var Model_test = function(){
-    var Model_base = require('./base.js');
+    var Model_base = require('./Base.js');
     extend(true,this,new Model_base());
     
     this.testdata = 'oooottest';
