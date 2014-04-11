@@ -31,14 +31,14 @@ lobby.initSocket();
 
 var Model_User = require('./model/User.js');
 var user = new Model_User();
-
+user.load(21,changeName);
 //new user
-user.name = 'guest' + Math.random();
-//user.id_user = 2;
-user.save(function(saved_user){
-    user = saved_user;
-    console.log(saved_user);
-});
+function changeName(){
+    this.name = 'pas-guest' + Math.random();
+    this.save(function(){
+        console.log(this);
+    });
+}
 
 
 

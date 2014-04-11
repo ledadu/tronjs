@@ -16,12 +16,15 @@ var Model_User = function(){
 
 Model_User.prototype.load = function(id_user,callBack){
     var connection = mysql_manager.getConnection();
-
+    var that = this;
     var query = connection.query('select * from user where id_user=' + id_user  + ';',function(err,rows,fields){
         if (err) throw err;
-        console.log(rows); 
+        that.id_user = rows[0].id_user; 
+        that.hash = rows[0].hash; 
+        that.name = rows[0].name; 
+        that.email = rows[0].email; 
+        callBack.apply(that);
     });
-    callBack(this);
 }
 
 Model_User.prototype.makeHash = function(){
@@ -49,9 +52,9 @@ Model_User.prototype.save = function(callBack){
         if(status.changedRows == 0){  //on insert
             that.id_user = status.insertId;
             that.makeHash();
-            that.save(function(){callBack(that)});
+            that.save(callBack.bind(that));
         }else{  //on update
-            callBack(that);
+            callBack.apply(that);
         }
     });
 }
