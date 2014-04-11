@@ -70,9 +70,11 @@ HttpServer.prototype.configureLoginPage = function(param) {
         var template_data = req.route.params;
         var user = new Model_User();
         user.login(template_data.email,template_data.password,
-                       function(){console.log(this);}
+                       function(){
+                            template_data.user = this;
+                            that.sendTemplate(template_data, 'login.html', res)
+                       }
                   );
-        that.sendTemplate(template_data, 'login.html', res)
     });
 }
 

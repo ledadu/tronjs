@@ -14,6 +14,9 @@
         <form class="sendValue">
             name <input name="nickname"/> <button >Change name</button>
         </form>
+        id = {{user.id_user}}<br/>
+        username = {{user.name}}<br/>
+        hash = {{user.hash}}<br/>
 
     </body>
 </html>

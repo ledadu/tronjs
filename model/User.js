@@ -24,10 +24,12 @@ Model_User.prototype.load = function(id_user,callBack){
     var that = this;
     var query = connection.query('select * from user where id_user=' + id_user  + ';',function(err,rows,fields){
         if (err) throw err;
-        that.id_user = rows[0].id_user; 
-        that.hash = rows[0].hash; 
-        that.name = rows[0].name; 
-        that.email = rows[0].email; 
+        if(rows.length>0){
+            that.id_user = rows[0].id_user; 
+            that.hash = rows[0].hash; 
+            that.name = rows[0].name; 
+            that.email = rows[0].email; 
+        }
         callBack.apply(that);
     });
 }
@@ -45,8 +47,8 @@ Model_User.prototype.login = function(email,password,callBack){
             that.hash = rows[0].hash; 
             that.name = rows[0].name; 
             that.email = rows[0].email; 
-            callBack.apply(that);
         }
+        callBack.apply(that);
     });
 }
 
