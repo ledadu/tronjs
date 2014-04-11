@@ -29,17 +29,21 @@ _.each(worlds,function(world){
 
 lobby.initSocket();
 
+/*
+ 
 var Model_User = require('./model/User.js');
+
 var user = new Model_User();
-user.load(21,changeName);
+
+user.load(21,
+            function(){user.changeAndSaveName('yo-guest' + Math.random(),logthis);}
+         );
 //new user
-function changeName(){
-    this.name = 'pas-guest' + Math.random();
-    this.save(function(){
+function logthis(){
         console.log(this);
-    });
 }
 
+*/
 
 
 

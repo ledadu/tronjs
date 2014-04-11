@@ -1,6 +1,7 @@
 var fs = require('fs');
 var _ = require('underscore');
 var Handlebars = require('handlebars');
+var Model_User = require('./model/User.js');
 
 
 var Express = require('express');
@@ -13,11 +14,14 @@ var HttpServer = function(tcport) {
     this.io = require('socket.io').listen(this.server);
 };
 
-
+/*
+ * init of routing HttpServer
+ */
 HttpServer.prototype.configure = function(param) {
     var that = this;
     that.configureLobbyPage(param);
     that.configureWorldPage();
+    that.configureLoginPage();
     this.app.use(Express.static(__dirname + '/public'));
 
     that.io.configure('production', function() {
@@ -25,6 +29,9 @@ HttpServer.prototype.configure = function(param) {
     });
 };
 
+/*
+ * Lobby page
+ */
 HttpServer.prototype.configureLobbyPage = function(param) {
     var that = this;
     this.app.get('/', function(req, res) {
@@ -43,6 +50,9 @@ HttpServer.prototype.configureLobbyPage = function(param) {
     });
 }
 
+/*
+ * world page
+ */
 HttpServer.prototype.configureWorldPage = function(param) {
      var that = this;
      this.app.get('/world/:worldId?', function(req, res) {
@@ -51,6 +61,25 @@ HttpServer.prototype.configureWorldPage = function(param) {
     });
 }
 
+/*
+ * login page
+ */
+HttpServer.prototype.configureLoginPage = function(param) {
+     var that = this;
+     this.app.get('/login/:email?/password/:password?', function(req, res) {
+        var template_data = req.route.params;
+        var user = new Model_User();
+        user.login(template_data.email,template_data.password,
+                       function(){console.log(this);}
+                  );
+        that.sendTemplate(template_data, 'login.html', res)
+    });
+}
+
+
+/* 
+ * Http response + template
+ */
 HttpServer.prototype.sendTemplate = function(template_data, templateName, response) {
     fs.readFile(__dirname + '/templates/' + templateName + '.t', function(err, template_source) {
         if (err) {
@@ -65,3 +94,4 @@ HttpServer.prototype.sendTemplate = function(template_data, templateName, respon
 }
 
 module.exports = HttpServer;
+

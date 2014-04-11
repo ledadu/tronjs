@@ -3,7 +3,9 @@ var extend = require('extend');
 var crypto = require('crypto');
 
 var mysql_manager = require('../mysql-manager.js');
-
+/*
+ * construct
+ */
 var Model_User = function(){
     var Model_base = require('./Base.js');
     extend(true,this,new Model_base());
@@ -14,6 +16,9 @@ var Model_User = function(){
     this.email = '';
 };
 
+/*
+ * load user
+ */
 Model_User.prototype.load = function(id_user,callBack){
     var connection = mysql_manager.getConnection();
     var that = this;
@@ -27,6 +32,28 @@ Model_User.prototype.load = function(id_user,callBack){
     });
 }
 
+/*
+ * user login
+ */
+Model_User.prototype.login = function(email,password,callBack){
+    var connection = mysql_manager.getConnection();
+    var that = this;
+    var query = connection.query('select * from user where email=\'' + email  + '\' and password=\'' + password  + '\';',function(err,rows,fields){
+        if (err) throw err;
+        if(rows.length>0){
+            that.id_user = rows[0].id_user; 
+            that.hash = rows[0].hash; 
+            that.name = rows[0].name; 
+            that.email = rows[0].email; 
+            callBack.apply(that);
+        }
+    });
+}
+
+
+/*
+ * make hash AES id_user
+ */
 Model_User.prototype.makeHash = function(){
     var cipher = crypto.createCipher("aes192","nibblePass");
     var hashArray = [];
@@ -35,7 +62,9 @@ Model_User.prototype.makeHash = function(){
     this.hash = hashArray.join('');
 }
 
-
+/*
+ * save
+ */
 Model_User.prototype.save = function(callBack){
     var that = this;
     var connection = mysql_manager.getConnection();
@@ -59,7 +88,13 @@ Model_User.prototype.save = function(callBack){
     });
 }
 
-
+/*
+ * change and save name
+ */
+Model_User.prototype.changeAndSaveName = function(name,callBack){
+    this.name = name;
+    this.save(callBack);
+}
 
 
 
