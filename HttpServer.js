@@ -1,14 +1,23 @@
 var fs = require('fs');
+
 var _ = require('underscore');
+var Express = require('express');
+var RedisStore = require('connect-redis')(Express);
+
 var Handlebars = require('handlebars');
 var Model_User = require('./model/User.js');
 
-
-var Express = require('express');
 var HttpServer = function(tcport) {
     //construct
     //this.server = require('http').createServer(handler);    
     this.app = new Express();
+    this.app.use(Express.cookieParser());
+    this.app.use(Express.session(
+                                    {store: new RedisStore(),
+                                     secret:'Nibble_S3rcret'
+                                    }
+                                )
+                );
     this.server = require('http').createServer(this.app);
     this.server.listen(tcport);
     this.io = require('socket.io').listen(this.server);
@@ -57,6 +66,7 @@ HttpServer.prototype.configureWorldPage = function(param) {
      var that = this;
      this.app.get('/world/:worldId?', function(req, res) {
         var template_data = req.route.params;
+        console.log(req.session);
         that.sendTemplate(template_data, 'world.html', res)
     });
 }
@@ -72,7 +82,9 @@ HttpServer.prototype.configureLoginPage = function(param) {
         user.login(template_data.email,template_data.password,
                        function(){
                             template_data.user = this;
-                            that.sendTemplate(template_data, 'login.html', res)
+                            console.log(req);
+                            req.session.id_user = this.id_user; 
+                            that.sendTemplate(template_data, 'login.html', res);
                        }
                   );
     });
