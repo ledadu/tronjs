@@ -127,27 +127,36 @@ World.prototype.initSocket = function() {
     that.ioNamespace     //.sockets
 
             .on('connection', function(socket) {
-                console.log('Io on Connaction cookie header :', socket.request.headers.cookie);     //get cookie information
-                that.ioNamespace.session = that.httpServer.io.getSessionFromCookieHeader(socket.request.headers.cookie);
-                console.log('Session from ioNamespace', JSON.stringify(that.ioNamespace.session));
-                player = new Player();
-		player.speedStep = that.id;
-		player.on('playerMove', function(ppp) {
-			console.log('playerMove',ppp.name);
-		});
-                socket.heartbeatTimeout = 5000;
+                console.log('## socket Io ##  (connection)');     
 
-                console.log('Got connect!', player.id, player.name);
+                player = new Player()
+;
+                var sid = that.httpServer.getSID(socket.request.headers.cookie);
+                that.httpServer.getSessionFromSID(sid,function(err, session){
+                    //that.ioNamespace.session = that.httpServer.io.getSessionFromCookieHeader(socket.request.headers.cookie);
+                    console.log('Session from ioNamespace @@->', JSON.stringify(session));
+                    if(!_.isUndefined(session) && !_.isUndefined(session.name)){
+                        player.name = session.name;
+                    }
+    		        player.speedStep = that.id;
+            		player.on('playerMove', function(ppp) {
+		            	console.log('playerMove',ppp.name);
+        	    	});
+                    socket.heartbeatTimeout = 5000;
 
-                socket.emit('caneva', that.getdata());
-                player.spawn(that);
-                that.players.list[player.id] = player;
+                    console.log('Got connect!', player.id, player.name);
+    
+                    socket.emit('caneva', that.getdata());
+                    player.spawn(that);
+                    that.players.list[player.id] = player;
 
-                var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
-                bindSocketPlayerWorld.bindInput();
-                bindSocketPlayerWorld.bindSendValue();
-                bindSocketPlayerWorld.bindPrintDebug();
-                bindSocketPlayerWorld.bindDisconnect();
+                    var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
+                    bindSocketPlayerWorld.bindInput();
+                    bindSocketPlayerWorld.bindSendValue();
+                    bindSocketPlayerWorld.bindPrintDebug();
+                    bindSocketPlayerWorld.bindDisconnect();
+
+                });
         
             });
 

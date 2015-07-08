@@ -2,13 +2,14 @@ var fs = require('fs');
 
 var _ = require('underscore');
 var util = require('util');
-var Express = require('express'),
-    Cookie = require('cookie'),
-    cookieParser = require('cookie-parser'),
-    session = require('express-session'),
-    sessionStore = new session.MemoryStore(),
+var Express       = require('express'),
+    session       = require('express-session'),
+    //RedisStore    = require('connect-redis')(Express),
+    sessionStore  = new session.MemoryStore(),
+    Cookie        = require('cookie'),
+    cookieParser  = require('cookie-parser'),
     COOKIE_SECRET = 'secret',
-    COOKIE_NAME = 'sid';
+    COOKIE_NAME   = 'sid';
 
 var Handlebars = require('handlebars');
 var Model_User = require('./model/User.js');
@@ -24,6 +25,7 @@ var HttpServer = function(tcport) {
     this.app.use(session({
         name: COOKIE_NAME,
         store: sessionStore,
+        //store: new RedisStore(),
         secret: COOKIE_SECRET,
         saveUninitialized: true,
         resave: true,
@@ -39,26 +41,6 @@ var HttpServer = function(tcport) {
     this.server = require('http').createServer(this.app);
     this.server.listen(tcport);
     this.io = require('socket.io').listen(this.server);
-    
-    
-    //add function to get session from cookie headers
-
-    this.io.getSessionFromCookieHeader = function(cookieHeader){
-        var cookies = {},
-            match,
-            rePattern = /(.*)?=(.*)?/,    
-            reSplit = /\s*;\s*/;
-        if(!_.isUndefined(cookieHeader)){
-            _.each(cookieHeader.split(reSplit), function(cookie){
-                match = rePattern.exec(cookie); 
-                cookies[match[1]] = match[2];
-                
-            });
-        }
-        return that.sessionPool[cookies['tronSess']];
-
-    };
-
 
     
 };
@@ -77,12 +59,12 @@ HttpServer.prototype.configure = function(param) {
 
     //io authorization (getting session)
     that.io.set('authorization', function (handshakeData, callback) {
-        that.io.session = that.io.getSessionFromCookieHeader(handshakeData.headers.cookie);
 
-        console.log('## socket.IO ##');
-        console.log('session : ', JSON.stringify(that.io.session));
+        console.log('## socket.IO ##  (authorization)');
 
-        that.getSID(handshakeData.headers.cookie);
+        var sid = that.getSID(handshakeData.headers.cookie);
+        
+//        console.log('session : ',that.getSessionFromSID(sid));
         
         callback(null, true); // error first, 'authorized' boolean second 
     });
@@ -90,22 +72,10 @@ HttpServer.prototype.configure = function(param) {
 };
 
 
-/*
- *  Put session in sessionPool
- */
-HttpServer.prototype.putInSessionPool = function(sessionId, session){
-    this.sessionPool[sessionId] = session; 
+HttpServer.prototype.getSessionFromSID = function(sid,cb){
+    // cb = function(err, session)
+    sessionStore.get(sid, cb);
 }
-
-
-/*
- *  Session init
- */
-HttpServer.prototype.sessionInit = function(request){
-    request.session.tron_Sess_ID = request.cookies['tronSess'] ;
-}
-
-
 
 
 /*
@@ -153,9 +123,8 @@ HttpServer.prototype.configureWorldPage = function(param) {
         console.log('## HTTP ## (world)');     
         console.log('session : ', JSON.stringify(req.session));
         
-        that.getSID(req.headers.cookie);
+        var sid = that.getSID(req.headers.cookie);
 
-        that.putInSessionPool(req.cookies['tronSess'], req.session);
         that.sendTemplate(template_data, 'world.html', res);
     });
 }
