@@ -4,7 +4,7 @@ var Players = require('./Players');
 var BindSocketPlayerWorld = require('./BindSocketPlayerWorld');
 
 
-var World = function(io,idWorld) {
+var World = function(httpServer, io, idWorld) {
     //construct
     this.id = idWorld;
     this.width = 800;
@@ -13,6 +13,7 @@ var World = function(io,idWorld) {
     this.pixelReso = 5;
     this.players = new Players();
     this.ioNamespace = io;
+    this.httpServer = httpServer;
     this.gameMode = "DM"
 };
 
@@ -126,6 +127,9 @@ World.prototype.initSocket = function() {
     that.ioNamespace     //.sockets
 
             .on('connection', function(socket) {
+                console.log('Io on Connaction cookie header :', socket.request.headers.cookie);     //get cookie information
+                that.ioNamespace.session = that.httpServer.io.getSessionFromCookieHeader(socket.request.headers.cookie);
+                console.log('Session from ioNamespace', JSON.stringify(that.ioNamespace.session));
                 player = new Player();
 		player.speedStep = that.id;
 		player.on('playerMove', function(ppp) {

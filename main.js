@@ -16,7 +16,8 @@ var httpServer = new HttpServer(8181);
 var worlds = new Array();
 
 for (idWorld = 1; idWorld < 33; idWorld++) {
-    worlds.push( new World(httpServer.io.of('/world' + idWorld),idWorld) );
+    ioNamespace = httpServer.io.of('/world' + idWorld);
+    worlds.push( new World(httpServer, ioNamespace, idWorld) );
 }
 
 var lobby = new Lobby( httpServer.io.of('/lobby') , worlds );

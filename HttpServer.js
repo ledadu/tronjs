@@ -1,27 +1,69 @@
 var fs = require('fs');
 
 var _ = require('underscore');
-var Express = require('express');
-var RedisStore = require('connect-redis')(Express);
+var util = require('util');
+var Express = require('express'),
+    Cookie = require('cookie'),
+    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
+    sessionStore = new session.MemoryStore(),
+    COOKIE_SECRET = 'secret',
+    COOKIE_NAME = 'sid';
 
 var Handlebars = require('handlebars');
 var Model_User = require('./model/User.js');
 
 var HttpServer = function(tcport) {
-    //construct
-    //this.server = require('http').createServer(handler);    
+    var that = this;
+    //Load Express http framework
     this.app = new Express();
-    this.app.use(Express.cookieParser());
-    this.app.use(Express.session(
-                                    {store: new RedisStore(),
-                                     secret:'Nibble_S3rcret'
-                                    }
-                                )
-                );
+    this.sessionPool = {};
+
+    this.app.use(cookieParser(COOKIE_SECRET));
+
+    this.app.use(session({
+        name: COOKIE_NAME,
+        store: sessionStore,
+        secret: COOKIE_SECRET,
+        saveUninitialized: true,
+        resave: true,
+        cookie: {
+            path: '/',
+            httpOnly: true,
+            secure: false,
+            maxAge: null
+        }
+    }));
+
+    // create server
     this.server = require('http').createServer(this.app);
     this.server.listen(tcport);
     this.io = require('socket.io').listen(this.server);
+    
+    
+    //add function to get session from cookie headers
+
+    this.io.getSessionFromCookieHeader = function(cookieHeader){
+        var cookies = {},
+            match,
+            rePattern = /(.*)?=(.*)?/,    
+            reSplit = /\s*;\s*/;
+        if(!_.isUndefined(cookieHeader)){
+            _.each(cookieHeader.split(reSplit), function(cookie){
+                match = rePattern.exec(cookie); 
+                cookies[match[1]] = match[2];
+                
+            });
+        }
+        return that.sessionPool[cookies['tronSess']];
+
+    };
+
+
+    
 };
+
+
 
 /*
  * init of routing HttpServer
@@ -33,10 +75,38 @@ HttpServer.prototype.configure = function(param) {
     that.configureLoginPage();
     this.app.use(Express.static(__dirname + '/public'));
 
-    that.io.configure('production', function() {
-        that.io.set('log level', 1);
+    //io authorization (getting session)
+    that.io.set('authorization', function (handshakeData, callback) {
+        that.io.session = that.io.getSessionFromCookieHeader(handshakeData.headers.cookie);
+
+        console.log('## socket.IO ##');
+        console.log('session : ', JSON.stringify(that.io.session));
+
+        that.getSID(handshakeData.headers.cookie);
+        
+        callback(null, true); // error first, 'authorized' boolean second 
     });
+    
 };
+
+
+/*
+ *  Put session in sessionPool
+ */
+HttpServer.prototype.putInSessionPool = function(sessionId, session){
+    this.sessionPool[sessionId] = session; 
+}
+
+
+/*
+ *  Session init
+ */
+HttpServer.prototype.sessionInit = function(request){
+    request.session.tron_Sess_ID = request.cookies['tronSess'] ;
+}
+
+
+
 
 /*
  * Lobby page
@@ -46,12 +116,13 @@ HttpServer.prototype.configureLobbyPage = function(param) {
     this.app.get('/', function(req, res) {
         var template_data = {worlds:[]};
         _.each(param.worlds, function(world) {
-		var worldData = {};
-		worldData.id=world.id;
-		worldData.gameMode = world.gameMode;
-		worldData.players = world.players.list;
-		worldData.nbPlayers = _.keys(world.players.list).length;
-		template_data.worlds.push(worldData);
+            var worldData = {
+                id        : world.id,
+                gameMode  : world.gameMode,
+                players   : world.players.list,
+                nbPlayers : _.keys(world.players.list).length,
+            };
+            template_data.worlds.push(worldData);
         });
 
         that.sendTemplate(template_data, 'lobby.html', res)
@@ -65,11 +136,49 @@ HttpServer.prototype.configureLobbyPage = function(param) {
 HttpServer.prototype.configureWorldPage = function(param) {
      var that = this;
      this.app.get('/world/:worldId?', function(req, res) {
-        var template_data = req.route.params;
-        console.log(req.session);
-        that.sendTemplate(template_data, 'world.html', res)
+        //that.sessionInit(req);
+        //req.session.tron_Sess_ID = req.cookies['tronSess'] ;
+        var template_data = req.params;
+
+        if(!_.isUndefined(req.session.id_user)){
+            template_data.id_user = req.session.id_user;
+        }
+
+        if(_.isUndefined(req.session.name)){
+            req.session.name = makeid();
+        }
+
+        template_data.name    = req.session.name;
+
+        console.log('## HTTP ## (world)');     
+        console.log('session : ', JSON.stringify(req.session));
+        
+        that.getSID(req.headers.cookie);
+
+        that.putInSessionPool(req.cookies['tronSess'], req.session);
+        that.sendTemplate(template_data, 'world.html', res);
     });
 }
+
+HttpServer.prototype.getSID = function(cookie) {
+
+    //console.log('*** GET SID from cookie ****');
+    if (_.isUndefined(cookie)) {
+        return null;
+    }
+    var cookies = Cookie.parse(cookie);
+    if (! cookies[COOKIE_NAME]) {
+        return next(new Error('Missing cookie ' + COOKIE_NAME));
+    }
+    var sid = cookieParser.signedCookie(cookies[COOKIE_NAME], COOKIE_SECRET);
+    if (! sid) {
+        return next(new Error('Cookie signature is not valid'));
+    }
+    console.log('----> session ID ( %s )', sid);
+    return sid;
+
+}
+
 
 /*
  * login page
@@ -77,14 +186,19 @@ HttpServer.prototype.configureWorldPage = function(param) {
 HttpServer.prototype.configureLoginPage = function(param) {
      var that = this;
      this.app.get('/login/:email?/password/:password?', function(req, res) {
-        var template_data = req.route.params;
+        var template_data = req.params;
         var user = new Model_User();
         user.login(template_data.email,template_data.password,
                        function(){
-                            template_data.user = this;
-                            console.log(req);
+                            template_data.user  = this;
                             req.session.id_user = this.id_user; 
+                            req.session.name    = this.name; 
                             that.sendTemplate(template_data, 'login.html', res);
+        
+                            console.log('## HTTP ## (login)');     
+                            console.log('session : ', JSON.stringify(req.session))
+        
+                            that.getSID(req.headers.cookie);
                        }
                   );
     });
@@ -105,6 +219,17 @@ HttpServer.prototype.sendTemplate = function(template_data, templateName, respon
                 );
     })
             ;
+}
+
+function makeid()
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 5; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
 }
 
 module.exports = HttpServer;

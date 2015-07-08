@@ -12,6 +12,7 @@
     </head>
     <body>
         <div id="text"></div>
+        <div id="id_user">id_user : {{id_user}}</div>
         <div id="cnv" style="border:solid 1px #eeeeee;position: relative;"></div>
         <form class="sendValue">
             name <input name="nickname"/> <button >Change name</button>
