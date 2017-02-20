@@ -8,9 +8,9 @@ var World = function(httpServer, io, idWorld) {
     //construct
     this.id = idWorld;
     this.width = 800;
-    this.height = 400;
+    this.height = 800;
     this.bmp = [];
-    this.pixelReso = 5;
+    this.pixelReso = 2;
     this.players = new Players();
     this.ioNamespace = io;
     this.httpServer = httpServer;
@@ -93,24 +93,26 @@ World.prototype.playersRoutine = function() {
 
 // routine for this world
 World.prototype.serverRoutine = function() {
-    countplayernotdead = 0;
-    var that = this;
-    if (_.size(that.players.list) > 1) {
-        countplayernotdead = that.players.countPlayerNotDead();
-        if (countplayernotdead == 0) {
-            that.restartWorld();
-        } else
-        if (countplayernotdead.id != undefined) {
-            that.restartWorld();
-            if (_.size(that.players.list) > 1) {
-                countplayernotdead.score++;
-            }
+    var that             = this,
+        nbPlayersPlaying = _.size(that.players.list),
+        playersNotDead   = this.players.getPlayersNotDead();
+
+    if (nbPlayersPlaying >1 && playersNotDead.length == 1 ) {
+        if (nbPlayersPlaying > 1) {
+            playersNotDead[0].score++;
         }
+        this.restartWorld();
+    }
+
+    if (nbPlayersPlaying == 1 && playersNotDead == 0) {
+
+        this.restartWorld();
+    }
+
+    if (nbPlayersPlaying >=1) {
 
         that.playersRoutine();
     }
-    
-
         
     setTimeout(function() {
         that.serverRoutine()
