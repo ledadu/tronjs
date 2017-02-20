@@ -13,8 +13,13 @@ var Player = function() {
     this.score = 0;
     this.color = getRandomColor();
     this.direction = "right";
+    this.activatePower = false;
     this.speedStep = 5 ;
+    this.powerDuration = 10 * this.speedStep;
+    this.powerCooldown = 100 * this.speedStep;
+    this.powerStep = 0;
     this.step = 0;
+    this.class = "jumper";
     //construct
 }
 

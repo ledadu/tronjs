@@ -9,6 +9,7 @@ function BindSocketPlayerWorld(socket, world, player) {
 BindSocketPlayerWorld.prototype.bindInput = function() {
     var that = this;
     that.socket.on('keydown', function(data) {
+        console.log('keydown',data);
         that._executePlayerFunction(data, that.world);
     });
 
@@ -41,16 +42,12 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
         _.each(data, function(data) {
             if (data.name == 'nickname') {
                 oldplayerName = that.player.name;
-//                that.socket.broadcast.emit('playerQuit', that.player);
-//                that.socket.emit('playerQuit', that.player);
                 that.world.ioNamespace.emit('playerQuit', that.player);
 
                 that.player.name = data.value;
                 if (that.world.players.list[that.player.id] != undefined) {
                     that.world.players.list[that.player.id] = that.player;
                 }
-//                that.socket.broadcast.emit('playerUpdate', that.player);
-//                that.socket.emit('playerUpdate', that.player);
                 that.world.ioNamespace.emit('playerUpdate', that.player);
             }
         });
@@ -74,6 +71,7 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
     if (data.keyFunction != '') {
         if (that.player.direction != "dead") {
             if (_.contains(that.player.directionlist, data.keyFunction)) {
+                this.player.activatePower = false;
                 if (
                         (
                                 (data.keyFunction == "left" || data.keyFunction == "right") &&
@@ -93,12 +91,19 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
 
         }
         if (data.keyFunction == "clear") {
+            this.player.activatePower = false;
             console.log("clear Bmp");
             that.world.bmp = [];
-//            that.socket.broadcast.emit('caneva', that.world.getdata());
-//            that.socket.emit('caneva', that.world.getdata());
             that.world.ioNamespace.emit('caneva', that.world.getdata());
         }
+
+        if (data.keyFunction == "activatePower") {
+            if (!this.player.activatePower && this.player.powerStep > this.player.powerCooldown) {
+                this.player.powerStep = 0;
+                this.player.activatePower = true;
+            }
+        }
+
     }
 }
 

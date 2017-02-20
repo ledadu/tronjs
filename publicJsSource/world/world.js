@@ -5,6 +5,7 @@ var keyFunctions = {
     38: "up",
     40: "down",
     27: "clear",
+    16: "activatePower"
 }
 
 var world ;
@@ -196,7 +197,9 @@ function initSocket() {
     });
 
     socket.on('playerUpdate', function(player) {
-        App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+        if (player.class == 'jumper' && !player.activatePower) {
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+        }
         players[player.id] = player;
         refreshLayer();
     });

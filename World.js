@@ -47,6 +47,13 @@ World.prototype.playersRoutine = function() {
         if (player == false)
             return;
 	player.step++;
+    player.powerStep++;
+
+    if (player.activatePower && player.powerStep > player.powerDuration) {
+        player.activatePower = false;
+        player.powerStep = 0;
+    }
+
 	if(player.step>player.speedStep){	
         	switch (player.direction) {
 	            case "right":
@@ -67,26 +74,25 @@ World.prototype.playersRoutine = function() {
 	        if (that.bmp[player.x] == undefined) {
         	    that.bmp[player.x] = [];
 	        }
-	        if (player.direction != "dead")
+	        if (player.direction != "dead" && (player.class == 'jumper' && !player.activatePower))
         	    if (
 	                    player.x < 0 || player.x * that.pixelReso > that.width ||
 	                    player.y < 0 || player.y * that.pixelReso > that.height ||
 	                    that.bmp[player.x][player.y] != null
 	                    ) {
 	                player.kill();
-	//                socketplayer.broadcast.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-	//                socketplayer.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
 	                that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
 	            }
 
-	        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+            if (!player.activatePower) {
+    	        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+            }
 
 	        if (_.contains(player.directionlist, player.direction)) {
 	            that.players.list[player.id] = player;
-	//            socketplayer.broadcast.emit('playerUpdate', player);
-	//            socketplayer.emit('playerUpdate', player);
 	            that.ioNamespace.emit('playerUpdate', player);
 	        }
+            
 	}
     });
 }
@@ -135,7 +141,6 @@ World.prototype.initSocket = function() {
 ;
                 var sid = that.httpServer.getSID(socket.request.headers.cookie);
                 that.httpServer.getSessionFromSID(sid,function(err, session){
-                    //that.ioNamespace.session = that.httpServer.io.getSessionFromCookieHeader(socket.request.headers.cookie);
                     console.log('Session from ioNamespace @@->', JSON.stringify(session));
                     if(!_.isUndefined(session) && !_.isUndefined(session.name)){
                         player.name = session.name;
