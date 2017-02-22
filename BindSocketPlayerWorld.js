@@ -71,7 +71,6 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
     if (data.keyFunction != '') {
         if (that.player.direction != "dead") {
             if (_.contains(that.player.directionlist, data.keyFunction)) {
-                this.player.activatePower = false;
                 if (
                         (
                                 (data.keyFunction == "left" || data.keyFunction == "right") &&

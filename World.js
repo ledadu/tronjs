@@ -54,7 +54,7 @@ World.prototype.playersRoutine = function() {
         player.powerStep = 0;
     }
 
-	if(player.step>player.speedStep){	
+	if(player.step>player.speedStep){
         	switch (player.direction) {
 	            case "right":
         	        player.x ++;
@@ -70,29 +70,41 @@ World.prototype.playersRoutine = function() {
 	                break;
 	        }
 		player.step=0;
-	
+
 	        if (that.bmp[player.x] == undefined) {
         	    that.bmp[player.x] = [];
 	        }
-	        if (player.direction != "dead" && (player.class == 'jumper' && !player.activatePower))
+	        if (player.direction != "dead")
         	    if (
 	                    player.x < 0 || player.x * that.pixelReso > that.width ||
 	                    player.y < 0 || player.y * that.pixelReso > that.height ||
 	                    that.bmp[player.x][player.y] != null
 	                    ) {
-	                player.kill();
-	                that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                    if (player.class == 'digger'){
+                        if (!player.activatePower) {
+        	                player.kill();
+	                        that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                        }
+                    } else {
+    	                player.kill();
+	                    that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                    }
+
 	            }
 
-            if (!player.activatePower) {
-    	        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+            if (player.class == 'digger'){
+                if (!player.activatePower) {
+        	        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+                }
+            } else {
+        	    that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
             }
 
 	        if (_.contains(player.directionlist, player.direction)) {
 	            that.players.list[player.id] = player;
 	            that.ioNamespace.emit('playerUpdate', player);
 	        }
-            
+
 	}
     });
 }
@@ -119,14 +131,14 @@ World.prototype.serverRoutine = function() {
 
         that.playersRoutine();
     }
-        
+
     setTimeout(function() {
         that.serverRoutine()
     }, 5);
 }
 
 
-// Socket 
+// Socket
 World.prototype.initSocket = function() {
     var that = this;
     var player;
@@ -135,7 +147,7 @@ World.prototype.initSocket = function() {
     that.ioNamespace     //.sockets
 
             .on('connection', function(socket) {
-                console.log('## socket Io ##  (connection)');     
+                console.log('## socket Io ##  (connection)');
 
                 player = new Player()
 ;
@@ -152,7 +164,7 @@ World.prototype.initSocket = function() {
                     socket.heartbeatTimeout = 5000;
 
                     console.log('Got connect!', player.id, player.name);
-    
+
                     socket.emit('caneva', that.getdata());
                     player.spawn(that);
                     that.players.list[player.id] = player;
@@ -164,11 +176,11 @@ World.prototype.initSocket = function() {
                     bindSocketPlayerWorld.bindDisconnect();
 
                 });
-        
+
             });
 
 
-       
+
 
     return this;
 }

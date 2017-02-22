@@ -19,7 +19,8 @@ var Player = function() {
     this.powerCooldown = 100 * this.speedStep;
     this.powerStep = 0;
     this.step = 0;
-    this.class = "jumper";
+    this.class = "digger";
+//    this.class = "speeder";
     //construct
 }
 

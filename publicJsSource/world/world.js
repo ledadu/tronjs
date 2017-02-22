@@ -139,7 +139,7 @@ function refreshLayer() {
 
     App.ctx2.font = "10px Arial";
     App.ctx2.fillStyle = "rgba(0, 0, 0, 0.5)";
-    //show player neme		
+    //show player neme
     $.each(players, function(playerName, player) {
         App.ctx2.fillText(player.name + '(' + player.score + ')', player.x * world.pixelReso, player.y * world.pixelReso);
     });
@@ -197,7 +197,16 @@ function initSocket() {
     });
 
     socket.on('playerUpdate', function(player) {
-        if (player.class == 'jumper' && !player.activatePower) {
+
+        var color = hexToRgb(player.color);
+
+        if (player.class == 'digger'){
+            if (player.activatePower) {
+                App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + '0.2' + ')');
+            } else {
+                App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+            }
+        } else {
             App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
         }
         players[player.id] = player;

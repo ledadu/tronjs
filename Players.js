@@ -4,6 +4,7 @@ var Players = function() {
     this.list={};   //list of Player
 };
 
+/*
 Players.prototype.removeplayer = function (pp) {
     newplayers = {};
     _.each(this.list, function(p) {
@@ -11,10 +12,10 @@ Players.prototype.removeplayer = function (pp) {
             newplayers[p.id] = pp;
         }
     });
-    this = newplayers;
+//    this = newplayers;
 };
-    
-Players.prototype.spawnAll = function (world) {    
+*/
+Players.prototype.spawnAll = function (world) {
     _.each(this.list, function(p) {
         p.spawn(world);
     });
