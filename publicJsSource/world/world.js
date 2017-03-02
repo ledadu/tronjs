@@ -10,7 +10,7 @@ var keyFunctions = {
 
 var world ;
 var players = {};
-var currentPlayer = null;
+var currentPlayerId = null;
 var screenMessages = [];
 
 
@@ -145,11 +145,12 @@ function refreshLayer() {
         App.ctx2.fillText(player.name + '(' + player.score + ')', player.x * world.pixelReso, player.y * world.pixelReso);
     });
 
-    //Show powerState 
+    //Show powerState
+
     App.ctx2.fillStyle = 'rgb(0,0,0)';
     App.ctx2.font = "italic 20px Arial";
-    App.ctx2.fillText(Math.round(currentPlayer.powerStep/currentPlayer.powerCharge*100) + '', 50, 100);
-    
+    /*App.ctx2.fillText(Math.round(currentPlayer.powerStep/currentPlayer.powerCharge*100) + '', 50, 100);*/
+
     // show screen message
     $.each(screenMessages, function(num, mess) {
         alpha = (mess.times / 100);
@@ -202,8 +203,6 @@ function initSocket() {
     });
 
     socket.on('playerUpdate', function(player) {
-
-        currentPlayer = player;
 
         var color = hexToRgb(player.color);
 

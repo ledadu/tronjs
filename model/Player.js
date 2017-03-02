@@ -1,8 +1,13 @@
 var _ = require('underscore');
+var extend = require('extend');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
 var Player = function(options) {
+
+    var Model_base = require('./base');
+    extend(true, this, new Model_base());
+
     //construct
      EventEmitter.call(this);
 
@@ -88,7 +93,7 @@ Player.prototype.routine = function() {
                     ) {
 
                 this.direction = this.currentCommand;
-                    socket.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
+                    socket.emit('showMessagesSreeen',{text: this.currentCommand + this.basedata, color:this.color});
                     //world.ioNamespace.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
             }
             return;

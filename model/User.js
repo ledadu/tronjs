@@ -7,9 +7,10 @@ var mysql_manager = require('../mysql-manager.js');
  * construct
  */
 var Model_User = function(){
-    var Model_base = require('./Base.js');
-    extend(true,this,new Model_base());
-    
+
+    var Model_base = require('./base');
+    extend(true, this, new Model_base());
+
     this.id_user = null;
     this.hash = '';
     this.name = '';
@@ -25,10 +26,10 @@ Model_User.prototype.load = function(id_user,callBack){
     var query = connection.query('select * from user where id_user=' + id_user  + ';',function(err,rows,fields){
         if (err) throw err;
         if(rows.length>0){
-            that.id_user = rows[0].id_user; 
-            that.hash = rows[0].hash; 
-            that.name = rows[0].name; 
-            that.email = rows[0].email; 
+            that.id_user = rows[0].id_user;
+            that.hash = rows[0].hash;
+            that.name = rows[0].name;
+            that.email = rows[0].email;
         }
         callBack.apply(that);
     });
@@ -43,10 +44,10 @@ Model_User.prototype.login = function(email,password,callBack){
     var query = connection.query('select * from user where email=\'' + email  + '\' and password=\'' + password  + '\';',function(err,rows,fields){
         if (err) throw err;
         if(rows.length>0){
-            that.id_user = rows[0].id_user; 
-            that.hash = rows[0].hash; 
-            that.name = rows[0].name; 
-            that.email = rows[0].email; 
+            that.id_user = rows[0].id_user;
+            that.hash = rows[0].hash;
+            that.name = rows[0].name;
+            that.email = rows[0].email;
         }
         callBack.apply(that);
     });
@@ -76,7 +77,7 @@ Model_User.prototype.save = function(callBack){
     }else{
         //insert
                 var sql = "insert into user(name,email) VALUES ('" + this.name + "','" + this.email  + "');";
-    }     
+    }
 
     var query = connection.query(sql,function(err,status,fields){
         if (err) throw err;

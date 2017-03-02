@@ -1,10 +1,15 @@
 var _ = require('underscore');
-var Player = require('./Player');
-var Players = require('./Players');
-var BindSocketPlayerWorld = require('./BindSocketPlayerWorld');
+var extend = require('extend');
+var Player = require('./player');
+var Players = require('../collection/players');
+var BindSocketPlayerWorld = require('../bind-socket-player-world');
 
 
 var World = function(httpServer, io, idWorld) {
+
+    var Model_base = require('./base');
+    extend(true, this, new Model_base());
+
     //construct
     this.id = idWorld;
     this.width = 800;
