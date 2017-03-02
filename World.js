@@ -47,126 +47,15 @@ World.prototype.playersRoutine = function() {
     var that = this;
     _.each(that.players.list, function(player) {
 
-        if (player == false)
+        if (player == false) {
             return;
-
-        //increment step
-	    player.step++;
-
-
-            //Refactor player class???????????
-            //Refactor player class???????????
-
-        //Activate action of player
-        if(player.step>player.speedStep){
-
-            //Pop command of player
-            player.currentCommand = player.commandPool.shift();
-
-            //inc power step
-            if (player.powerStep < player.powerCharge) {
-                player.powerStep++;
-            }
-
-            //Start Power
-            if (player.currentCommand == "activatePower") {
-                if (!player.activatePower && player.powerStep >= player.powerCharge) {
-                    player.powerStep = 0;
-                    player.activatePower = true;
-                }
-            }
-
-            //Set player direction
-            if (_.contains(player.directionlist, player.currentCommand)) {
-
-                if (
-                        (
-                                (player.currentCommand == "left" || player.currentCommand == "right") &&
-                                (player.direction == "up" || player.direction == "down")
-                                )
-                        ||
-                        (
-                                (player.currentCommand == "up" || player.currentCommand == "down") &&
-                                (player.direction == "left" || player.direction == "right")
-                                )
-                        ) {
-                    
-                    player.direction = player.currentCommand;
-//                    that.socket.emit('message', player.currentCommand); refactor from bindSocketPlayerWorld.js
-                }
-                return;
-
-
-            }
-
-            //disable stoping power
-            if (player.activatePower && player.powerStep >= player.powerDuration) {
-                player.activatePower = false;
-                player.powerStep = 0;
-            }
-
-          
-
-            //Move player
-            switch (player.direction) {
-                case "right":
-                    player.x ++;
-                    break;
-                case "left":
-                    player.x --;
-                    break;
-                case "up":
-                    player.y --;
-                    break;
-                case "down":
-                    player.y ++;
-                    break;
-            }
-
-            //reset player step
-            player.step=0;
-
-            if (that.bmp[player.x] == undefined) {
-                that.bmp[player.x] = [];
-            }
-
-            if (player.direction != "dead"){
-                //Manage player death colision
-                if (
-                        player.x < 0 || player.x * that.pixelReso > that.width ||
-                        player.y < 0 || player.y * that.pixelReso > that.height ||
-                        that.bmp[player.x][player.y] != null
-                        ) {
-                    if (player.class == 'digger'){
-                        if (!player.activatePower) {
-                            player.kill();
-                            that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-                        }
-                    } else {
-                        player.kill();
-                        that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-                    }
-
-                }
-            }
-
-            //Manage Bitmap change
-            if (player.class == 'digger'){
-                if (!player.activatePower) {
-                    that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
-                }
-            } else {
-                that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
-            }
-
-            //What!!!!!!!!
-            if (_.contains(player.directionlist, player.direction)) {
-                that.players.list[player.id] = player;
-                that.ioNamespace.emit('playerUpdate', player);
-            }
-
         }
+//TODO????? manage collision entre 2 vers genre face a face => egualité!!!
+        player.routine();
     });
+
+    return this;
+
 }
 
 // routine for this world
@@ -211,8 +100,7 @@ World.prototype.initSocket = function() {
             .on('connection', function(socket) {
                 console.log('## socket Io ##  (connection)');
 
-                player = new Player()
-;
+                player = new Player({world : that, socket: socket});
                 var sid = that.httpServer.getSID(socket.request.headers.cookie);
                 that.httpServer.getSessionFromSID(sid,function(err, session){
                     console.log('Session from ioNamespace @@->', JSON.stringify(session));
