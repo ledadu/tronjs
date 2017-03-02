@@ -13,6 +13,8 @@ var Player = function() {
     this.score = 0;
     this.color = getRandomColor();
     this.direction = "right";
+    this.commandPool = [];
+    this.currentCommand = "";
     this.activatePower = false;
     this.speedStep = 5 ;
     this.powerDuration = 10 * this.speedStep;
@@ -20,7 +22,7 @@ var Player = function() {
     this.powerStep = 0;
     this.step = 0;
     this.class = "digger";
-//    this.class = "speeder";
+    /*this.class = "speeder";*/
     //construct
 }
 

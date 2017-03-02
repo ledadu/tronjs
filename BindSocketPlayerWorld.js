@@ -69,26 +69,31 @@ BindSocketPlayerWorld.prototype.bindPrintDebug = function() {
 BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
     var that = this;
     if (data.keyFunction != '') {
-        if (that.player.direction != "dead") {
-            if (_.contains(that.player.directionlist, data.keyFunction)) {
-                if (
-                        (
-                                (data.keyFunction == "left" || data.keyFunction == "right") &&
-                                (that.player.direction == "up" || that.player.direction == "down")
-                                )
-                        ||
-                        (
-                                (data.keyFunction == "up" || data.keyFunction == "down") &&
-                                (that.player.direction == "left" || that.player.direction == "right")
-                                )
-                        ) {
-                    that.player.direction = data.keyFunction;
-                    that.socket.emit('message', data.keyFunction);
-                }
-                return;
-            }
 
-        }
+        this.player.commandPool.push(data.keyFunction);
+
+        that.socket.emit('message', data.keyFunction);
+    
+    /*if (that.player.direction != "dead") {*/
+    /*if (_.contains(that.player.directionlist, data.keyFunction)) {*/
+    /*if (*/
+    /*(*/
+    /*(data.keyFunction == "left" || data.keyFunction == "right") &&*/
+    /*(that.player.direction == "up" || that.player.direction == "down")*/
+    /*)*/
+    /*||*/
+    /*(*/
+    /*(data.keyFunction == "up" || data.keyFunction == "down") &&*/
+    /*(that.player.direction == "left" || that.player.direction == "right")*/
+    /*)*/
+    /*) {*/
+    /*that.player.direction = data.keyFunction;*/
+    /*that.socket.emit('message', data.keyFunction);*/
+    /*}*/
+    /*return;*/
+    /*}*/
+
+    /*}*/
         if (data.keyFunction == "clear") {
             this.player.activatePower = false;
             console.log("clear Bmp");
@@ -96,12 +101,12 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
             that.world.ioNamespace.emit('caneva', that.world.getdata());
         }
 
-        if (data.keyFunction == "activatePower") {
-            if (!this.player.activatePower && this.player.powerStep > this.player.powerCooldown) {
-                this.player.powerStep = 0;
-                this.player.activatePower = true;
-            }
-        }
+        /*if (data.keyFunction == "activatePower") {*/
+        /*if (!this.player.activatePower && this.player.powerStep > this.player.powerCooldown) {*/
+        /*this.player.powerStep = 0;*/
+        /*this.player.activatePower = true;*/
+        /*}*/
+        /*}*/
 
     }
 }

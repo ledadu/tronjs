@@ -10,11 +10,13 @@ var World = function(httpServer, io, idWorld) {
     this.width = 800;
     this.height = 800;
     this.bmp = [];
-    this.pixelReso = 2;
+    this.pixelReso = 10;
     this.players = new Players();
     this.ioNamespace = io;
     this.httpServer = httpServer;
-    this.gameMode = "DM"
+    this.gameMode = "DM";
+    this.heartbeatTimeout = 5;
+    this.heartbeat = 0; //refactor player.step??
 };
 
 //  export World attributes
@@ -44,68 +46,119 @@ World.prototype.restartWorld = function() {
 World.prototype.playersRoutine = function() {
     var that = this;
     _.each(that.players.list, function(player) {
+
         if (player == false)
             return;
-	player.step++;
-    player.powerStep++;
 
-    if (player.activatePower && player.powerStep > player.powerDuration) {
-        player.activatePower = false;
-        player.powerStep = 0;
-    }
+        //increment step
+	    player.step++;
+        player.powerStep++;
 
-	if(player.step>player.speedStep){
-        	switch (player.direction) {
-	            case "right":
-        	        player.x ++;
-	                break;
-	            case "left":
-	                player.x --;
-	                break;
-	            case "up":
-	                player.y --;
-	                break;
-	            case "down":
-	                player.y ++;
-	                break;
-	        }
-		player.step=0;
+        //desactivate??????????
+        if (player.activatePower && player.powerStep > player.powerDuration) {
+           player.activatePower = false;
+           player.powerStep = 0;
+        }
 
-	        if (that.bmp[player.x] == undefined) {
-        	    that.bmp[player.x] = [];
-	        }
-	        if (player.direction != "dead")
-        	    if (
-	                    player.x < 0 || player.x * that.pixelReso > that.width ||
-	                    player.y < 0 || player.y * that.pixelReso > that.height ||
-	                    that.bmp[player.x][player.y] != null
-	                    ) {
-                    if (player.class == 'digger'){
-                        if (!player.activatePower) {
-        	                player.kill();
-	                        that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-                        }
-                    } else {
-    	                player.kill();
-	                    that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
-                    }
+            //Refactor player class???????????
+            //Refactor player class???????????
 
-	            }
+        //Activate action of player
+        if(player.step>player.speedStep){
 
-            if (player.class == 'digger'){
-                if (!player.activatePower) {
-        	        that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+            //Pop command of player
+            player.currentCommand = player.commandPool.shift();
+
+            //Set player direction
+            if (_.contains(player.directionlist, player.currentCommand)) {
+
+                if (
+                        (
+                                (player.currentCommand == "left" || player.currentCommand == "right") &&
+                                (player.direction == "up" || player.direction == "down")
+                                )
+                        ||
+                        (
+                                (player.currentCommand == "up" || player.currentCommand == "down") &&
+                                (player.direction == "left" || player.direction == "right")
+                                )
+                        ) {
+                    
+                    player.direction = player.currentCommand;
+//                    that.socket.emit('message', player.currentCommand); refactor from bindSocketPlayerWorld.js
                 }
-            } else {
-        	    that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+                return;
+
+
             }
 
-	        if (_.contains(player.directionlist, player.direction)) {
-	            that.players.list[player.id] = player;
-	            that.ioNamespace.emit('playerUpdate', player);
-	        }
+            //Start Power
+            if (player.currentCommand == "activatePower") {
+                if (!player.activatePower && player.powerStep > player.powerCooldown) {
+                    player.powerStep = 0;
+                    player.activatePower = true;
+                }
+            }
 
-	}
+            //Move player
+            switch (player.direction) {
+                case "right":
+                    player.x ++;
+                    break;
+                case "left":
+                    player.x --;
+                    break;
+                case "up":
+                    player.y --;
+                    break;
+                case "down":
+                    player.y ++;
+                    break;
+            }
+
+            //reset player step
+            player.step=0;
+
+            if (that.bmp[player.x] == undefined) {
+                that.bmp[player.x] = [];
+            }
+
+            if (player.direction != "dead"){
+                //Manage player death colision
+                if (
+                        player.x < 0 || player.x * that.pixelReso > that.width ||
+                        player.y < 0 || player.y * that.pixelReso > that.height ||
+                        that.bmp[player.x][player.y] != null
+                        ) {
+                    if (player.class == 'digger'){
+                        if (!player.activatePower) {
+                            player.kill();
+                            that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                        }
+                    } else {
+                        player.kill();
+                        that.ioNamespace.emit('showMessagesSreeen', {text: player.id + ' ☹', color: player.color});
+                    }
+
+                }
+            }
+
+            //Manage Bitmap change
+            if (player.class == 'digger'){
+                if (!player.activatePower) {
+                    that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+                }
+            } else {
+                that.bmp[player.x][player.y] = {playerid :player.id ,color:player.color};
+            }
+
+            //What!!!!!!!!
+            if (_.contains(player.directionlist, player.direction)) {
+                that.players.list[player.id] = player;
+                that.ioNamespace.emit('playerUpdate', player);
+            }
+
+        }
     });
 }
 
@@ -114,6 +167,8 @@ World.prototype.serverRoutine = function() {
     var that             = this,
         nbPlayersPlaying = _.size(that.players.list),
         playersNotDead   = this.players.getPlayersNotDead();
+
+    this.heartbeat++;
 
     if (nbPlayersPlaying >1 && playersNotDead.length == 1 ) {
         if (nbPlayersPlaying > 1) {
@@ -134,7 +189,7 @@ World.prototype.serverRoutine = function() {
 
     setTimeout(function() {
         that.serverRoutine()
-    }, 5);
+    }, this.heartbeatTimeout);
 }
 
 
