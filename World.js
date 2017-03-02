@@ -52,13 +52,7 @@ World.prototype.playersRoutine = function() {
 
         //increment step
 	    player.step++;
-        player.powerStep++;
 
-        //desactivate??????????
-        if (player.activatePower && player.powerStep > player.powerDuration) {
-           player.activatePower = false;
-           player.powerStep = 0;
-        }
 
             //Refactor player class???????????
             //Refactor player class???????????
@@ -68,6 +62,19 @@ World.prototype.playersRoutine = function() {
 
             //Pop command of player
             player.currentCommand = player.commandPool.shift();
+
+            //inc power step
+            if (player.powerStep < player.powerCharge) {
+                player.powerStep++;
+            }
+
+            //Start Power
+            if (player.currentCommand == "activatePower") {
+                if (!player.activatePower && player.powerStep >= player.powerCharge) {
+                    player.powerStep = 0;
+                    player.activatePower = true;
+                }
+            }
 
             //Set player direction
             if (_.contains(player.directionlist, player.currentCommand)) {
@@ -92,13 +99,13 @@ World.prototype.playersRoutine = function() {
 
             }
 
-            //Start Power
-            if (player.currentCommand == "activatePower") {
-                if (!player.activatePower && player.powerStep > player.powerCooldown) {
-                    player.powerStep = 0;
-                    player.activatePower = true;
-                }
+            //disable stoping power
+            if (player.activatePower && player.powerStep >= player.powerDuration) {
+                player.activatePower = false;
+                player.powerStep = 0;
             }
+
+          
 
             //Move player
             switch (player.direction) {
