@@ -15,13 +15,12 @@ var World = function(httpServer, io, idWorld) {
     this.width = 800;
     this.height = 800;
     this.bmp = [];
-    this.pixelReso = 10;
+    this.pixelReso = 5;
     this.players = new Players();
     this.ioNamespace = io;
     this.httpServer = httpServer;
     this.gameMode = "DM";
-    this.heartbeatPeriod = 5;
-    this.heartbeat = 0; //refactor player.step??
+    this.heartbeat = 0; 
 };
 
 //  export World attributes
@@ -56,11 +55,9 @@ World.prototype.playersRoutine = function() {
             return;
         }
 //TODO????? manage collision entre 2 vers genre face a face => egualité!!!
-        player.routine();
+        player.routine(this.heartbeat);
     });
 
-    //Update clients
-    this.ioNamespace.emit('playersUpdate', this.players.list);
     return this;
 
 }
@@ -88,11 +85,13 @@ World.prototype.serverRoutine = function() {
     if (nbPlayersPlaying >=1) {
 
         that.playersRoutine();
+        //Update clients
+        this.ioNamespace.emit('playersUpdate', this.players.list);
     }
 
     setTimeout(function() {
         that.serverRoutine()
-    }, this.heartbeatPeriod);
+    }, this.id * 10);
 }
 
 
@@ -114,7 +113,6 @@ World.prototype.initSocket = function() {
                     if(!_.isUndefined(session) && !_.isUndefined(session.name)){
                         player.name = session.name;
                     }
-    		        player.speedStep = that.id;
             		player.on('playerMove', function(ppp) {
 		            	console.log('playerMove',ppp.name);
         	    	});

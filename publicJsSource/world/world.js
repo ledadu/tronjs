@@ -252,7 +252,7 @@ function initSocket() {
 
         if (player.class == 'digger'){
             if (player.activatePower) {
-                App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + '0.2' + ')');
+                App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + '0.15' + ')');
             } else {
                 App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
             }

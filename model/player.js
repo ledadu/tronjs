@@ -29,7 +29,7 @@ var Player = function(options) {
     this.powerDuration = 5;
     this.powerCharge = this.powerDuration * 10;
     this.powerStep = 0;
-    this.step = 0;
+    this.step = 0;  //live time
     this.class = "digger";
     /*this.class = "speeder";*/
     //construct
@@ -55,110 +55,105 @@ Player.prototype.routine = function() {
 
     var world  = this.getWorld(),
         socket = this.getSocket();
+    
 
-    //increment step
-    this.step++;
 
-    if(this.step>this.speedStep){
-        
-        //reset player step
-        this.step=0;
+    //Pop command of this
+    this.currentCommand = this.commandPool.shift();
 
-        //Pop command of this
-        this.currentCommand = this.commandPool.shift();
+    //inc power step
+    if (this.powerStep < this.powerCharge) {
+        this.powerStep++;
+    }
 
-        //inc power step
-        if (this.powerStep < this.powerCharge) {
-            this.powerStep++;
-        }
-
-        //Start Power
-        if (this.currentCommand == "activatePower") {
-            if (!this.activatePower && this.powerStep >= this.powerCharge) {
-                this.powerStep = 0;
-                this.activatePower = true;
-            }
-        }
-
-        //disable stoping power
-        if (this.activatePower && this.powerStep >= this.powerDuration) {
-            this.activatePower = false;
+    //Start Power
+    if (this.currentCommand == "activatePower") {
+        if (!this.activatePower && this.powerStep >= this.powerCharge) {
             this.powerStep = 0;
+            this.activatePower = true;
         }
+    }
 
-        //Set player direction
-        if (_.contains(this.directionlist, this.currentCommand)) {
+    //disable stoping power
+    if (this.activatePower && this.powerStep >= this.powerDuration) {
+        this.activatePower = false;
+        this.powerStep = 0;
+    }
 
-            if (
-                    (
-                            (this.currentCommand == "left" || this.currentCommand == "right") &&
-                            (this.direction == "up" || this.direction == "down")
-                            )
-                    ||
-                    (
-                            (this.currentCommand == "up" || this.currentCommand == "down") &&
-                            (this.direction == "left" || this.direction == "right")
-                            )
-                    ) {
+    //Set player direction
+    if (_.contains(this.directionlist, this.currentCommand)) {
 
-                this.direction = this.currentCommand;
-                    //socket.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
-                    //world.ioNamespace.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
-            }
+        if (
+                (
+                        (this.currentCommand == "left" || this.currentCommand == "right") &&
+                        (this.direction == "up" || this.direction == "down")
+                        )
+                ||
+                (
+                        (this.currentCommand == "up" || this.currentCommand == "down") &&
+                        (this.direction == "left" || this.direction == "right")
+                        )
+                ) {
 
-        }
-
-        //Move player
-        switch (this.direction) {
-            case "right":
-                this.x ++;
-                break;
-            case "left":
-                this.x --;
-                break;
-            case "up":
-                this.y --;
-                break;
-            case "down":
-                this.y ++;
-                break;
-        }
-
-        if (world.bmp[this.x] == undefined) {
-            world.bmp[this.x] = [];
-        }
-
-        if (this.direction != "dead"){
-            //Manage player death colision
-            if (
-                this.x < 0 || this.x * world.pixelReso > world.width ||
-                this.y < 0 || this.y * world.pixelReso > world.height ||
-                world.bmp[this.x][this.y] != null
-            ) {
-                if (this.class == 'digger'){
-                    if (!this.activatePower) {
-                        this.kill();
-                        world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
-                    }
-                } else {
-                    this.kill();
-                    world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
-                }
-
-            }
-        }
-
-        //Manage Bitmap change
-        if (this.class == 'digger'){
-            if (!this.activatePower) {
-                world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
-            }
-        } else {
-            world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
+            this.direction = this.currentCommand;
+                //socket.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
+                //world.ioNamespace.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
         }
 
     }
 
+    //Move player
+    switch (this.direction) {
+        case "right":
+            this.x ++;
+            break;
+        case "left":
+            this.x --;
+            break;
+        case "up":
+            this.y --;
+            break;
+        case "down":
+            this.y ++;
+            break;
+    }
+
+    if (world.bmp[this.x] == undefined) {
+        world.bmp[this.x] = [];
+    }
+
+    if (this.direction != "dead"){
+
+        //Inc player step
+        this.step++;
+
+        //Manage player death colision
+        if (
+            this.x < 0 || this.x * world.pixelReso > world.width ||
+            this.y < 0 || this.y * world.pixelReso > world.height ||
+            world.bmp[this.x][this.y] != null
+        ) {
+            if (this.class == 'digger'){
+                if (!this.activatePower) {
+                    this.kill();
+                    world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
+                }
+            } else {
+                this.kill();
+                world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
+            }
+
+        }
+    }
+
+    //Manage Bitmap change
+    if (this.class == 'digger'){
+        if (!this.activatePower) {
+            world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
+        }
+    } else {
+        world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
+    }
 
 };
 

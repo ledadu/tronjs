@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Players = function() {
     //construct
-    this.list={};   //list of Player
+    this.list = {};   //list of Player
 };
 
 Players.prototype.spawnAll = function (world) {
