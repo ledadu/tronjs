@@ -10,7 +10,8 @@ var keyFunctions = {
     38: "up",
     40: "down",
     27: "clear",
-    16: "activatePower"
+    16: "activatePower",
+    17: "activatePower2"
 }
 
 var world ;
@@ -208,7 +209,7 @@ function initSocket() {
     socket.on('debug', function(msg) {
         console.log(msg);
     });
- 
+
     //Disconect BIND
     socket.on('disconnect', function() {
         console.log("disconnected");

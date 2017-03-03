@@ -26,12 +26,12 @@ var Player = function(options) {
     this.commandPool = [];
     this.currentCommand = "";
     this.activatePower = false;
-    this.powerDuration = 5;
-    this.powerCharge = this.powerDuration * 10;
+    this.powerDuration = 30;
+    this.powerCharge = 80;
     this.powerStep = 0;
     this.step = 0;  //live time
-    this.class = "digger";
-    /*this.class = "speeder";*/
+    //this.class = "digger";
+    this.class = "speeder";
     //construct
 }
 
@@ -51,20 +51,33 @@ Player.prototype.spawn = function(world) {
     this.step = 0;
 };
 
-Player.prototype.routine = function() {
+Player.prototype.routine = function(heartbeat) {
 
     var world  = this.getWorld(),
         socket = this.getSocket();
-    
-
-
-    //Pop command of this
-    this.currentCommand = this.commandPool.shift();
 
     //inc power step
     if (this.powerStep < this.powerCharge) {
         this.powerStep++;
     }
+
+    if (this.class === 'speeder') {
+        if (heartbeat % 2 !== 0 && !this.activatePower) {
+            return this;
+        }
+        if (heartbeat % 4 !== 0 && !this.activatePower && this.activatePower2) {
+            return this;
+        }
+    } else {
+        if (heartbeat % 2 !== 0) {
+            return this;
+        }
+    }
+
+
+
+    //Pop command of this
+    this.currentCommand = this.commandPool.shift();
 
     //Start Power
     if (this.currentCommand == "activatePower") {
@@ -74,9 +87,22 @@ Player.prototype.routine = function() {
         }
     }
 
+    //Start Power 2
+    if (this.currentCommand == "activatePower2") {
+        if (!this.activatePower2 && this.powerStep >= this.powerCharge) {
+            this.powerStep = 0;
+            this.activatePower2 = true;
+        }
+    }
     //disable stoping power
     if (this.activatePower && this.powerStep >= this.powerDuration) {
         this.activatePower = false;
+        this.powerStep = 0;
+    }
+
+    //disable stoping power
+    if (this.activatePower2 && this.powerStep >= this.powerDuration) {
+        this.activatePower2 = false;
         this.powerStep = 0;
     }
 
@@ -154,6 +180,8 @@ Player.prototype.routine = function() {
     } else {
         world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
     }
+
+    return this;
 
 };
 

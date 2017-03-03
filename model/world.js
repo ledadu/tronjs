@@ -20,7 +20,7 @@ var World = function(httpServer, io, idWorld) {
     this.ioNamespace = io;
     this.httpServer = httpServer;
     this.gameMode = "DM";
-    this.heartbeat = 0; 
+    this.heartbeat = 0;
 };
 
 //  export World attributes
@@ -55,7 +55,8 @@ World.prototype.playersRoutine = function() {
             return;
         }
 //TODO????? manage collision entre 2 vers genre face a face => egualité!!!
-        player.routine(this.heartbeat);
+//kill sametime player a same coordonate
+        player.routine(that.heartbeat);
     });
 
     return this;
@@ -91,7 +92,7 @@ World.prototype.serverRoutine = function() {
 
     setTimeout(function() {
         that.serverRoutine()
-    }, this.id * 10);
+    }, (6 - this.id) * 5);
 }
 
 
