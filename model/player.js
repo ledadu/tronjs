@@ -157,12 +157,6 @@ Player.prototype.routine = function() {
             world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
         }
 
-        //What!!!!!!!!
-        if (_.contains(this.directionlist, this.direction)) {
-            /*world.players.list[this.id] = this;*/
-            world.ioNamespace.emit('playerUpdate', this);
-        }
-
     }
 
 

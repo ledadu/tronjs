@@ -59,6 +59,8 @@ World.prototype.playersRoutine = function() {
         player.routine();
     });
 
+    //Update clients
+    this.ioNamespace.emit('playersUpdate', this.players.list);
     return this;
 
 }

@@ -1,4 +1,9 @@
 
+
+//TODO PUT THIS in a OBJET!!!
+
+
+
 var keyFunctions = {
     37: "left",
     39: "right",
@@ -183,37 +188,66 @@ function initSocket() {
 
     socket = io.connect('http://'+ location.host + '/world' + worldId ),
             text = $('#text');
-
+    //connected BIND
     socket.on('connect', function() {
         console.log("connected");
         text.html('connected');
     });
 
+    //Trigger at the connection
     socket.on('initParam', function(params) {
         currentPlayerId = params.player_id;
     });
 
+    //Message BIND
     socket.on('message', function(msg) {
         text.html(msg);
     });
 
+    //Debug BIND
     socket.on('debug', function(msg) {
         console.log(msg);
     });
-
+ 
+    //Disconect BIND
     socket.on('disconnect', function() {
         console.log("disconnected");
         text.html('disconnected');
     });
 
+    //Reset caneva by server
     socket.on('caneva', function(worldObj) {
         world = worldObj;
 	players = {};
         initCanvas(world);
     });
-//TODO make players update!!!! one packet!!!
-    socket.on('playerUpdate', function(player) {
 
+    //Update all players
+    socket.on('playersUpdate', function(players) {
+        _.each(players, function(player){
+            playerUpdate(player);
+        });
+        refreshLayer();
+    });
+
+    //Update a player
+    socket.on('playerUpdate', function(player) {
+        playerUpdate(player);
+        refreshLayer();
+    });
+
+    //On opponnet quit
+    socket.on('playerQuit', function(player) {
+        delete players[player.id];
+    });
+
+    //Show message on screen
+    socket.on('showMessagesSreeen', function(textMess) {
+        putmessage(textMess);
+    });
+}
+
+    function playerUpdate(player) {
         var color = hexToRgb(player.color);
 
         if (player.class == 'digger'){
@@ -226,17 +260,8 @@ function initSocket() {
             App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
         }
         players[player.id] = player;
-        refreshLayer();
-    });
+    };
 
-    socket.on('playerQuit', function(player) {
-        delete players[player.id];
-    });
-
-    socket.on('showMessagesSreeen', function(textMess) {
-        putmessage(textMess);
-    });
-}
 
 
 
