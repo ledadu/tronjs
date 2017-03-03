@@ -109,7 +109,7 @@ function initCanvas(world) {
     });
 
 }
-
+//TODO make point function
 App.line = function(x1, y1, x2, y2, color) {
     App.ctx.beginPath();
     App.ctx.fillStyle = "solid";
@@ -248,21 +248,34 @@ function initSocket() {
     });
 }
 
-    function playerUpdate(player) {
-        var color = hexToRgb(player.color);
+function playerUpdate(player) {
+    var color       = hexToRgb(player.color),
+        darkenColor = darken(color,0.3);
 
-        if (player.class == 'digger'){
-            if (player.activatePower) {
-                App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + '0.15' + ')');
-            } else {
-                App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
-            }
+    if (player.class == 'digger'){
+        if (player.activatePower) {
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + '0.15' + ')');
         } else {
             App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
         }
-        players[player.id] = player;
-    };
+    }
 
+    if (player.class == 'speeder'){
+        if (player.activatePower || player.activatePower2) {
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgb(' + darkenColor.r + ', ' + darkenColor.g + ', ' + darkenColor.b + ')');
+        } else {
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+        }
+
+    }
+    players[player.id] = player;
+};
+
+function darken(color,force) {
+    return _.mapObject(color, function(value) {
+        return Math.round(value - force * value);
+    });
+};
 
 
 
