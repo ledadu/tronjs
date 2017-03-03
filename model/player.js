@@ -60,6 +60,9 @@ Player.prototype.routine = function() {
     this.step++;
 
     if(this.step>this.speedStep){
+        
+        //reset player step
+        this.step=0;
 
         //Pop command of this
         this.currentCommand = this.commandPool.shift();
@@ -75,6 +78,12 @@ Player.prototype.routine = function() {
                 this.powerStep = 0;
                 this.activatePower = true;
             }
+        }
+
+        //disable stoping power
+        if (this.activatePower && this.powerStep >= this.powerDuration) {
+            this.activatePower = false;
+            this.powerStep = 0;
         }
 
         //Set player direction
@@ -93,21 +102,11 @@ Player.prototype.routine = function() {
                     ) {
 
                 this.direction = this.currentCommand;
-                    socket.emit('showMessagesSreeen',{text: this.currentCommand + this.basedata, color:this.color});
+                    //socket.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
                     //world.ioNamespace.emit('showMessagesSreeen',{text: this.currentCommand, color:this.color});
             }
-            return;
-
 
         }
-
-        //disable stoping power
-        if (this.activatePower && this.powerStep >= this.powerDuration) {
-            this.activatePower = false;
-            this.powerStep = 0;
-        }
-
-
 
         //Move player
         switch (this.direction) {
@@ -124,9 +123,6 @@ Player.prototype.routine = function() {
                 this.y ++;
                 break;
         }
-
-        //reset player step
-        this.step=0;
 
         if (world.bmp[this.x] == undefined) {
             world.bmp[this.x] = [];

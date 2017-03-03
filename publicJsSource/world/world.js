@@ -136,6 +136,7 @@ function initKeyBinding() {
 }
 
 function refreshLayer() {
+    var currentPlayer = players[currentPlayerId];
     App.ctx2.clearRect(0, 0, App.ctx2.canvas.width, App.ctx2.canvas.height);
 
     App.ctx2.font = "10px Arial";
@@ -146,11 +147,11 @@ function refreshLayer() {
     });
 
     //Show powerState
-
-    App.ctx2.fillStyle = 'rgb(0,0,0)';
-    App.ctx2.font = "italic 20px Arial";
-    /*App.ctx2.fillText(Math.round(currentPlayer.powerStep/currentPlayer.powerCharge*100) + '', 50, 100);*/
-
+    if (!_.isUndefined(currentPlayer)) {
+        App.ctx2.fillStyle = 'rgb(0,0,0)';
+        App.ctx2.font = "italic 20px Arial";
+        App.ctx2.fillText(Math.round(currentPlayer.powerStep / currentPlayer.powerCharge*100), 50, 100); //in percent
+    }
     // show screen message
     $.each(screenMessages, function(num, mess) {
         alpha = (mess.times / 100);
@@ -179,6 +180,7 @@ function bindChangeName() {
 }
 
 function initSocket() {
+
     socket = io.connect('http://'+ location.host + '/world' + worldId ),
             text = $('#text');
 
@@ -187,8 +189,16 @@ function initSocket() {
         text.html('connected');
     });
 
+    socket.on('initParam', function(params) {
+        currentPlayerId = params.player_id;
+    });
+
     socket.on('message', function(msg) {
         text.html(msg);
+    });
+
+    socket.on('debug', function(msg) {
+        console.log(msg);
     });
 
     socket.on('disconnect', function() {
@@ -201,7 +211,7 @@ function initSocket() {
 	players = {};
         initCanvas(world);
     });
-
+//TODO make players update!!!! one packet!!!
     socket.on('playerUpdate', function(player) {
 
         var color = hexToRgb(player.color);

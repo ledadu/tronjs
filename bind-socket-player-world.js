@@ -60,7 +60,7 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
 
 BindSocketPlayerWorld.prototype.bindPrintDebug = function() {
     var that = this;
-    that.socket.on('printDebug', function(data) {
+    that.socket.on('debug', function(data) {
         console.log(data);
     });
 }
@@ -70,44 +70,19 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
     var that = this;
     if (data.keyFunction != '') {
 
-        this.player.commandPool.push(data.keyFunction);
+        //Two commands can't be same at suite
+        if(_.last(this.player.commandPool) !== data.keyFunction) {
+            this.player.commandPool.push(data.keyFunction);
+        }
 
-        that.socket.emit('message', data.keyFunction);
+        //that.socket.emit('message', data.keyFunction);
     
-    /*if (that.player.direction != "dead") {*/
-    /*if (_.contains(that.player.directionlist, data.keyFunction)) {*/
-    /*if (*/
-    /*(*/
-    /*(data.keyFunction == "left" || data.keyFunction == "right") &&*/
-    /*(that.player.direction == "up" || that.player.direction == "down")*/
-    /*)*/
-    /*||*/
-    /*(*/
-    /*(data.keyFunction == "up" || data.keyFunction == "down") &&*/
-    /*(that.player.direction == "left" || that.player.direction == "right")*/
-    /*)*/
-    /*) {*/
-    /*that.player.direction = data.keyFunction;*/
-    /*that.socket.emit('message', data.keyFunction);*/
-    /*}*/
-    /*return;*/
-    /*}*/
-
-    /*}*/
         if (data.keyFunction == "clear") {
             this.player.activatePower = false;
             console.log("clear Bmp");
             that.world.bmp = [];
             that.world.ioNamespace.emit('caneva', that.world.getdata());
         }
-
-        /*if (data.keyFunction == "activatePower") {*/
-        /*if (!this.player.activatePower && this.player.powerStep > this.player.powerCooldown) {*/
-        /*this.player.powerStep = 0;*/
-        /*this.player.activatePower = true;*/
-        /*}*/
-        /*}*/
-
     }
 }
 

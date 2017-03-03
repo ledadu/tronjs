@@ -20,7 +20,7 @@ var World = function(httpServer, io, idWorld) {
     this.ioNamespace = io;
     this.httpServer = httpServer;
     this.gameMode = "DM";
-    this.heartbeatTimeout = 5;
+    this.heartbeatPeriod = 5;
     this.heartbeat = 0; //refactor player.step??
 };
 
@@ -90,7 +90,7 @@ World.prototype.serverRoutine = function() {
 
     setTimeout(function() {
         that.serverRoutine()
-    }, this.heartbeatTimeout);
+    }, this.heartbeatPeriod);
 }
 
 
@@ -129,6 +129,7 @@ World.prototype.initSocket = function() {
                     bindSocketPlayerWorld.bindSendValue();
                     bindSocketPlayerWorld.bindPrintDebug();
                     bindSocketPlayerWorld.bindDisconnect();
+                    player.getSocket().emit('initParam', {player_id: player.id});
 
                 });
 
