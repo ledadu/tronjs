@@ -20,7 +20,7 @@ var Player = function(options) {
     this.x = 50;
     this.y = 50;
     this.score = 0;
-    this.color = getRandomColor();
+    this.color = getRandomColor2();
     this.direction = "right";
     this.commandPool = [];
     this.currentCommand = "";
@@ -119,14 +119,14 @@ Player.prototype.routine = function() {
             this.activatePower2 = true;
         }
     }
-    //disable stoping power
+    //Stoping power
     if (this.activatePower && this.powerStep >= this.powerDuration) {
         this.activatePower = false;
         this.powerStep = 0;
     }
 
-    //disable stoping power 2
-    if (this.activatePower2 && this.powerStep >= this.powerDuration) {
+    //Stoping power 2
+    if (this.activatePower2 && this.powerStep >= this.powerDuration*2) {
         this.activatePower2 = false;
         this.powerStep = 0;
     }
@@ -221,6 +221,14 @@ function getRandomColor() {
         color += letters[Math.round(Math.random() * 15)];
     }
     return color;
+}
+
+function getRandomColor2() {
+    return {
+        r: 64 + Math.round(Math.random()*128),
+        g: 64 + Math.round(Math.random()*128),
+        b: 64 + Math.round(Math.random()*128),
+    };i
 }
 
 

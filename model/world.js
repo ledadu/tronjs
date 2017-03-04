@@ -66,7 +66,7 @@ World.prototype.serverRoutine = function() {
         relaunch         = function() {
             setTimeout(function() {
                 that.serverRoutine()
-            }, (6 -that.id));
+            }, (11 -that.id));
         }
 
 
@@ -176,6 +176,8 @@ World.prototype.initSocket = function() {
                     console.log('Got connect!', player.id, player.name);
 
                     socket.emit('caneva', that.getdata());
+
+                    socket.emit('boniUpdate', that.boni.list);
                     
                     that.players.add(player);
                     player.spawn(that);

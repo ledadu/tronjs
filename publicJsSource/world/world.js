@@ -158,8 +158,8 @@ function refreshLayer() {
     // show screen message
     $.each(screenMessages, function(num, mess) {
         alpha = (mess.times / 1000);
-        color = hexToRgb(mess.color);
-        App.ctx2.fillStyle = 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + alpha + ')';
+        color = mess.color;
+        App.ctx2.fillStyle = writeRgbStyle(color, alpha);
         App.ctx2.font = "italic 20px Arial";
         App.ctx2.fillText(mess.text, 50, 50 + num * 50);
         mess.times -= 5;
@@ -167,6 +167,17 @@ function refreshLayer() {
         if (mess.times < 10) {
             screenMessages = _.without(screenMessages, mess);
         }
+    });
+
+    //Show bonus
+    _.each(this.boni, function(bonus){
+        var color = {
+            r: 64 + Math.round(Math.random()*128),
+            g: 64 + Math.round(Math.random()*128),
+            b: 64 + Math.round(Math.random()*128),
+        };
+
+        App.line(bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, writeRgbStyle(color));
     });
 }
 
@@ -241,6 +252,7 @@ function initSocket() {
 
     //Update all boni
     socket.on('boniUpdate', function(boni) {
+        this
         _.each(boni, function(bonus){
             bonusUpdate(bonus);
         });
@@ -254,43 +266,33 @@ function initSocket() {
 }
 
 function playerUpdate(player) {
-    var color       = hexToRgb(player.color),
-        darkenColor = darken(color,0.3);
-
+    var darkenColor = darken(player.color, 0.3);
     if (player.class == 'digger'){
         if (player.activatePower) {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + '0.15' + ')');
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color, 0.15));
         } else {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
         }
     }
 
     if (player.class == 'speeder'){
-        if (player.activatePower || player.activatePower) {
+        if (player.activatePower || player.activatePower2) {
             App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgb(' + darkenColor.r + ', ' + darkenColor.g + ', ' + darkenColor.b + ')');
         } else {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
         }
 
     }
 
     if (_.isNull(player.class)){
-        App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+        App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
     }
 
     players[player.id] = player;
 };
 
 function bonusUpdate(bonus) {
-
-    var color = {
-        r: 64 + Math.round(Math.random()*128),
-        g: 64 + Math.round(Math.random()*128),
-        b: 64 + Math.round(Math.random()*128),
-    };
-
-    App.line(bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, 'rgb(' +color.r + ',' + color.g + ',' + color.b + ')');
-
+    boni[bonus.id] = bonus;
 };
 
 function darken(color,force) {
@@ -299,6 +301,12 @@ function darken(color,force) {
     });
 };
 
+function writeRgbStyle(color, alpha){
+    if (_.isUndefined(alpha)) {
+        return 'rgb(' +color.r + ',' + color.g + ',' + color.b + ')';
+    }
+    return 'rgba(' +color.r + ',' + color.g + ',' + color.b + ',' + alpha + ')';
+};
 
 
 

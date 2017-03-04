@@ -15,7 +15,7 @@ var httpServer = new HttpServer(8181);
 
 var worlds = new Array();
 
-for (idWorld = 1; idWorld <= 5; idWorld++) {
+for (idWorld = 1; idWorld <= 10; idWorld++) {
     ioNamespace = httpServer.io.of('/world' + idWorld);
     worlds.push( new World(httpServer, ioNamespace, idWorld) );
 }
