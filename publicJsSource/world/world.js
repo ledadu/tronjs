@@ -5,22 +5,22 @@
 
 
 var keyFunctions = {
-    37: "left",
-    39: "right",
-    38: "up",
-    40: "down",
-    27: "clear",
-    16: "activatePower",
-    17: "activatePower2"
-}
+        37: "left",
+        39: "right",
+        38: "up",
+        40: "down",
+        27: "clear",
+        16: "activatePower",
+        17: "activatePower2"
+    },
+    world,
+    players         = {},
+    bonus           = {},
+    currentPlayerId = null,
+    screenMessages  = [];
 
-var world ;
-var players = {};
-var currentPlayerId = null;
-var screenMessages = [];
 
 
-;
 var socket;
 $(document).ready(function() {
 

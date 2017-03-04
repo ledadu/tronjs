@@ -1,7 +1,12 @@
-var _ = require('underscore');
-var extend = require('extend');
-var Player = require('./player');
+
+var _       = require('underscore');
+var extend  = require('extend');
+
+var Player  = require('./player');
 var Players = require('../collection/players');
+var Bonus   = require('./bonus');
+var Boni    = require('../collection/boni');
+
 var BindSocketPlayerWorld = require('../bind-socket-player-world');
 
 
@@ -15,8 +20,9 @@ var World = function(httpServer, io, idWorld) {
     this.width = 800;
     this.height = 800;
     this.bmp = [];
-    this.pixelReso = 5;
-    this.players = new Players();
+    this.pixelReso = 5; 
+    this.players = new Players({parent: this});
+    this.boni    = new Boni({parent:this});
     this.ioNamespace = io;
     this.httpServer = httpServer;
     this.gameMode = "DM";
@@ -31,6 +37,7 @@ World.prototype.getdata = function() {
         bmp: this.bmp,
         pixelReso: this.pixelReso,
         players: this.players,
+        boni: this.boni,
     }
     return data;
 }
@@ -39,27 +46,32 @@ World.prototype.getdata = function() {
 World.prototype.restartWorld = function() {
     this.bmp = [];
     console.log("restartWorld");
-    var that = this;
-    that.ioNamespace.emit('caneva', that.getdata());
-    if (that.players != undefined) {
-        that.players.spawnAll(that);
+    this.ioNamespace.emit('caneva', this.getdata());
+    if (this.players != undefined) {
+        this.players.spawnAll(this);
     }
+    if (this.boni != undefined) {
+        this.boni    = new Boni({parent: this});
+    }
+
 }
 
 // routine for all player in this world
 World.prototype.playersRoutine = function() {
-    var that = this;
-    _.each(that.players.list, function(player) {
+    var that = this,
+        aPlayerHasBeenUpdated = false;
 
+    this.players.each(function(player) {
         if (player == false) {
             return;
         }
 //TODO????? manage collision entre 2 vers genre face a face => egualité!!!
 //kill sametime player a same coordonate
-        player.routine(that.heartbeat);
+        var playerUpdated = player.routine();
+        aPlayerHasBeenUpdated = aPlayerHasBeenUpdated || playerUpdated; 
     });
 
-    return this;
+    return aPlayerHasBeenUpdated;
 
 }
 
@@ -67,9 +79,14 @@ World.prototype.playersRoutine = function() {
 World.prototype.serverRoutine = function() {
     var that             = this,
         nbPlayersPlaying = _.size(that.players.list),
-        playersNotDead   = this.players.getPlayersNotDead();
+        playersNotDead   = this.players.getPlayersNotDead(),
+        relaunch         = function() {
+            setTimeout(function() {
+                that.serverRoutine()
+            }, (6 -that.id));
+        }
 
-    this.heartbeat++;
+
 
     if (nbPlayersPlaying >1 && playersNotDead.length == 1 ) {
         if (nbPlayersPlaying > 1) {
@@ -85,14 +102,18 @@ World.prototype.serverRoutine = function() {
 
     if (nbPlayersPlaying >=1) {
 
-        that.playersRoutine();
+        this.heartbeat++;
+
         //Update clients
-        this.ioNamespace.emit('playersUpdate', this.players.list);
+        if (that.playersRoutine()) {
+            //emit just when players are upbated
+            this.ioNamespace.emit('playersUpdate', this.players.list);
+        }
     }
 
-    setTimeout(function() {
-        that.serverRoutine()
-    }, (6 - this.id) * 5);
+    relaunch();
+
+    return this;
 }
 
 
@@ -107,7 +128,7 @@ World.prototype.initSocket = function() {
             .on('connection', function(socket) {
                 console.log('## socket Io ##  (connection)');
 
-                player = new Player({world : that, socket: socket});
+                player = new Player({socket: socket});
                 var sid = that.httpServer.getSID(socket.request.headers.cookie);
                 that.httpServer.getSessionFromSID(sid,function(err, session){
                     console.log('Session from ioNamespace @@->', JSON.stringify(session));
@@ -122,8 +143,9 @@ World.prototype.initSocket = function() {
                     console.log('Got connect!', player.id, player.name);
 
                     socket.emit('caneva', that.getdata());
+                    
+                    that.players.add(player);
                     player.spawn(that);
-                    that.players.list[player.id] = player;
 
                     var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
                     bindSocketPlayerWorld.bindInput();

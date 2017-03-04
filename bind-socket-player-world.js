@@ -22,13 +22,7 @@ BindSocketPlayerWorld.prototype.bindDisconnect = function() {
     var that = this;
     that.socket.on('disconnect', function() {
         console.log('Got disconnect!', that.player.id, that.player.name);
-        var newplayersList = {};
-        _.each(that.world.players.list, function(p) {
-            if (p.id != that.player.id) {
-                newplayersList[p.id] = p;
-            }
-        });
-        that.world.players.list = newplayersList;
+        that.world.players.remove(that.player);
         that.socket.broadcast.emit('playerQuit', that.player);
         that.player = false;
     });
@@ -41,12 +35,11 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
         console.log('sendValue!', data);
         _.each(data, function(data) {
             if (data.name == 'nickname') {
-                oldplayerName = that.player.name;
                 that.world.ioNamespace.emit('playerQuit', that.player);
 
                 that.player.name = data.value;
                 if (that.world.players.list[that.player.id] != undefined) {
-                    that.world.players.list[that.player.id] = that.player;
+                    that.world.players.list[that.player.id].name = data.value;
                 }
                 that.world.ioNamespace.emit('playerUpdate', that.player);
             }

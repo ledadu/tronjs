@@ -2,7 +2,7 @@ var _ = require('underscore');
 var extend = require('extend');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-
+//remove options!! must pass by collection parent
 var Player = function(options) {
 
     var Model_base = require('./base');
@@ -12,7 +12,6 @@ var Player = function(options) {
      EventEmitter.call(this);
 
     //Put in function to todge 'Too much recurstion'
-    this.getWorld  = function(){return options.world;};
     this.getSocket = function(){return options.socket;};
 
     this.directionlist = ["left", "right", "up", "down"];
@@ -26,12 +25,12 @@ var Player = function(options) {
     this.commandPool = [];
     this.currentCommand = "";
     this.activatePower = false;
-    this.powerDuration = 30;
-    this.powerCharge = 80;
+    this.powerDuration = 100;
+    this.powerCharge = 300;
     this.powerStep = 0;
     this.step = 0;  //live time
-    //this.class = "digger";
-    this.class = "speeder";
+    this.class = "digger";
+    //this.class = "speeder";
     //construct
 }
 
@@ -51,9 +50,15 @@ Player.prototype.spawn = function(world) {
     this.step = 0;
 };
 
-Player.prototype.routine = function(heartbeat) {
 
-    var world  = this.getWorld(),
+/**
+ * Player routine
+ *
+ *@return boolean = true if player has been updated
+ */
+Player.prototype.routine = function() {
+
+    var world  = this.getCollection().getParent(),
         socket = this.getSocket();
 
     //inc power step
@@ -62,19 +67,22 @@ Player.prototype.routine = function(heartbeat) {
     }
 
     if (this.class === 'speeder') {
-        if (heartbeat % 2 !== 0 && !this.activatePower) {
-            return this;
+        if (world.heartbeat % 2 !== 0 && !this.activatePower) {
+            return false;
         }
-        if (heartbeat % 4 !== 0 && !this.activatePower && this.activatePower2) {
-            return this;
+        if (world.heartbeat % 4 !== 0 && !this.activatePower && this.activatePower2) {
+            return false;
         }
     } else {
-        if (heartbeat % 2 !== 0) {
-            return this;
+        if (world.heartbeat % 2 !== 0) {
+            return false;
         }
     }
 
-
+    // sync move speed with pixelReso
+    if (world.heartbeat % (world.pixelReso*2) !== 0)  {
+        return false;
+    }
 
     //Pop command of this
     this.currentCommand = this.commandPool.shift();
@@ -181,7 +189,7 @@ Player.prototype.routine = function(heartbeat) {
         world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
     }
 
-    return this;
+    return true;
 
 };
 
