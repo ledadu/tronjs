@@ -15,7 +15,7 @@ var Player = function(options) {
     this.getSocket = function(){return options.socket;};
 
     this.directionlist = ["left", "right", "up", "down"];
-    this.id = makeid();
+    this.id = this.makeid();
     this.name = this.id;
     this.x = 50;
     this.y = 50;
@@ -29,7 +29,8 @@ var Player = function(options) {
     this.powerCharge = 300;
     this.powerStep = 0;
     this.step = 0;  //live time
-    this.class = "digger";
+    this.class = null;
+    //this.class = "digger";
     //this.class = "speeder";
     //construct
 }
@@ -44,6 +45,7 @@ Player.prototype.kill = function() {
 };
 
 Player.prototype.spawn = function(world) {
+    this.class = null;
     this.direction = _.sample(this.directionlist);
     this.x = 1/4 * world.width / world.pixelReso  +  Math.floor((world.width / world.pixelReso * 1/2) * Math.random());
     this.y = 1/4 * world.height / world.pixelReso  +  Math.floor((world.height / world.pixelReso * 1/2) * Math.random());
@@ -67,12 +69,15 @@ Player.prototype.routine = function() {
     }
 
     if (this.class === 'speeder') {
-        if (world.heartbeat % 2 !== 0 && !this.activatePower) {
+        //normal speed
+        if (world.heartbeat % 2 !== 0 && !this.activatePower2 && !this.activatePower) {
             return false;
         }
-        if (world.heartbeat % 4 !== 0 && !this.activatePower && this.activatePower2) {
+        //lower speed
+        if (world.heartbeat % 4 !== 0 && !this.activatePower2 && this.activatePower) {
             return false;
         }
+        //else fast speed
     } else {
         if (world.heartbeat % 2 !== 0) {
             return false;
@@ -80,23 +85,35 @@ Player.prototype.routine = function() {
     }
 
     // sync move speed with pixelReso
-    if (world.heartbeat % (world.pixelReso*2) !== 0)  {
+    if (world.heartbeat % (world.pixelReso) !== 0)  {
         return false;
+    }
+
+    //------- Start player move ---------
+    
+    //get bonus
+    var touchedBonus = world.boni.getBonusFromXY(this.x,this.y);
+    if (!_.isNull(touchedBonus)) {
+        //Apply player class of bonus
+        if (touchedBonus.class === 'playerClass') {
+            this.class = touchedBonus.value;
+            socket.emit('showMessagesSreeen',{text: 'Got player class : ' + this.class, color:this.color});
+        }
     }
 
     //Pop command of this
     this.currentCommand = this.commandPool.shift();
 
     //Start Power
-    if (this.currentCommand == "activatePower") {
-        if (!this.activatePower && this.powerStep >= this.powerCharge) {
+    if (!_.isNull(this.class) && this.currentCommand == "activatePower") {
+        if (!this.activatePower && this.powerStep >= this.powerCharge/2) {
             this.powerStep = 0;
             this.activatePower = true;
         }
     }
 
     //Start Power 2
-    if (this.currentCommand == "activatePower2") {
+    if (!_.isNull(this.class) && this.currentCommand == "activatePower2") {
         if (!this.activatePower2 && this.powerStep >= this.powerCharge) {
             this.powerStep = 0;
             this.activatePower2 = true;
@@ -108,7 +125,7 @@ Player.prototype.routine = function() {
         this.powerStep = 0;
     }
 
-    //disable stoping power
+    //disable stoping power 2
     if (this.activatePower2 && this.powerStep >= this.powerDuration) {
         this.activatePower2 = false;
         this.powerStep = 0;
@@ -207,13 +224,3 @@ function getRandomColor() {
 }
 
 
-function makeid()
-{
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (var i = 0; i < 5; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
-}

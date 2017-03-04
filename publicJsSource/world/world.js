@@ -10,12 +10,12 @@ var keyFunctions = {
         38: "up",
         40: "down",
         27: "clear",
-        16: "activatePower",
-        17: "activatePower2"
+        65: "activatePower",
+        90: "activatePower2"
     },
     world,
     players         = {},
-    bonus           = {},
+    boni            = {},
     currentPlayerId = null,
     screenMessages  = [];
 
@@ -121,15 +121,9 @@ App.line = function(x1, y1, x2, y2, color) {
     App.ctx.stroke();
 }
 
-
-
-
 function putmessage(textMess) {
-    screenMessages.push({text: textMess.text, times: 100, color: textMess.color});
-}
-;
-
-
+    screenMessages.push({text: textMess.text, times: 1000, color: textMess.color});
+};
 
 function initKeyBinding() {
     $(document).keydown(function(a) {
@@ -142,7 +136,10 @@ function initKeyBinding() {
 }
 
 function refreshLayer() {
+
     var currentPlayer = players[currentPlayerId];
+
+    //clear screen
     App.ctx2.clearRect(0, 0, App.ctx2.canvas.width, App.ctx2.canvas.height);
 
     App.ctx2.font = "10px Arial";
@@ -160,12 +157,12 @@ function refreshLayer() {
     }
     // show screen message
     $.each(screenMessages, function(num, mess) {
-        alpha = (mess.times / 100);
+        alpha = (mess.times / 1000);
         color = hexToRgb(mess.color);
         App.ctx2.fillStyle = 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + alpha + ')';
         App.ctx2.font = "italic 20px Arial";
         App.ctx2.fillText(mess.text, 50, 50 + num * 50);
-        mess.times *= 0.8;
+        mess.times -= 5;
 
         if (mess.times < 10) {
             screenMessages = _.without(screenMessages, mess);
@@ -242,6 +239,14 @@ function initSocket() {
         delete players[player.id];
     });
 
+    //Update all boni
+    socket.on('boniUpdate', function(boni) {
+        _.each(boni, function(bonus){
+            bonusUpdate(bonus);
+        });
+        refreshLayer();
+    });
+
     //Show message on screen
     socket.on('showMessagesSreeen', function(textMess) {
         putmessage(textMess);
@@ -261,14 +266,31 @@ function playerUpdate(player) {
     }
 
     if (player.class == 'speeder'){
-        if (player.activatePower || player.activatePower2) {
+        if (player.activatePower || player.activatePower) {
             App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgb(' + darkenColor.r + ', ' + darkenColor.g + ', ' + darkenColor.b + ')');
         } else {
             App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
         }
 
     }
+
+    if (_.isNull(player.class)){
+        App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, '#' + player.color);
+    }
+
     players[player.id] = player;
+};
+
+function bonusUpdate(bonus) {
+
+    var color = {
+        r: 64 + Math.round(Math.random()*128),
+        g: 64 + Math.round(Math.random()*128),
+        b: 64 + Math.round(Math.random()*128),
+    };
+
+    App.line(bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, 'rgb(' +color.r + ',' + color.g + ',' + color.b + ')');
+
 };
 
 function darken(color,force) {

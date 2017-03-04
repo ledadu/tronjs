@@ -18,7 +18,7 @@ var World = function(httpServer, io, idWorld) {
     //construct
     this.id = idWorld;
     this.width = 800;
-    this.height = 800;
+    this.height = 600;
     this.bmp = [];
     this.pixelReso = 5; 
     this.players = new Players({parent: this});
@@ -44,34 +44,17 @@ World.prototype.getdata = function() {
 
 // clear world and spawn player
 World.prototype.restartWorld = function() {
+    
+    this.heartbeat = 0;
+
     this.bmp = [];
     console.log("restartWorld");
     this.ioNamespace.emit('caneva', this.getdata());
-    if (this.players != undefined) {
+    if (!_.isUndefined(this.players)) {
         this.players.spawnAll(this);
     }
-    if (this.boni != undefined) {
-        this.boni    = new Boni({parent: this});
-    }
 
-}
-
-// routine for all player in this world
-World.prototype.playersRoutine = function() {
-    var that = this,
-        aPlayerHasBeenUpdated = false;
-
-    this.players.each(function(player) {
-        if (player == false) {
-            return;
-        }
-//TODO????? manage collision entre 2 vers genre face a face => egualité!!!
-//kill sametime player a same coordonate
-        var playerUpdated = player.routine();
-        aPlayerHasBeenUpdated = aPlayerHasBeenUpdated || playerUpdated; 
-    });
-
-    return aPlayerHasBeenUpdated;
+    this.boni = new Boni({parent: this});
 
 }
 
@@ -105,9 +88,15 @@ World.prototype.serverRoutine = function() {
         this.heartbeat++;
 
         //Update clients
-        if (that.playersRoutine()) {
+        if (this.playersRoutine()) {
             //emit just when players are upbated
             this.ioNamespace.emit('playersUpdate', this.players.list);
+        }
+
+        if (this.heartbeat === 1 || this.boniRoutine()) {
+            //emit just when players are upbated
+            this.ioNamespace.emit('boniUpdate', this.boni.list);
+
         }
     }
 
@@ -115,6 +104,50 @@ World.prototype.serverRoutine = function() {
 
     return this;
 }
+
+// routine for all player in this world
+World.prototype.playersRoutine = function() {
+    var that = this,
+        aPlayerHasBeenUpdated = false;
+
+    this.players.each(function(player) {
+        if (player == false) {
+            return;
+        }
+//TODO????? manage collision entre 2 vers genre face a face => egualité!!!
+//kill sametime player a same coordonate
+        var playerUpdated = player.routine();
+        aPlayerHasBeenUpdated = aPlayerHasBeenUpdated || playerUpdated; 
+    });
+
+    return aPlayerHasBeenUpdated;
+
+}
+
+//Routine for all boni in this world
+World.prototype.boniRoutine = function() {
+    var that = this,
+        aBonusHasBeenUpdated = false;
+/*
+    if (this.heartbeat % 1000 === 0) {
+        bonus = new Bonus();
+        this.boni.add(bonus);
+        bonus.spawn();
+    }
+*/
+    this.boni.each(function(bonus) {
+        if (bonus == false) {
+            return;
+        }
+
+        var bonusUpdated = bonus.routine();
+        aBonusHasBeenUpdated = aBonusHasBeenUpdated || bonusUpdated; 
+    });
+
+    return aBonusHasBeenUpdated;
+
+}
+
 
 
 // Socket

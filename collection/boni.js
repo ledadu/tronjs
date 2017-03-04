@@ -17,12 +17,29 @@ var Boni = function(options) {
 Boni.prototype.init = function(options){
     //spawn boni
     var bonus = null;
-    for (var i=1; i<=5; i++){
-        bonus = new Bonus();
-        this.add(bonus);
-        bonus.spawn();
-    };
+    
+    bonus = new Bonus({class:'playerClass',value:'speeder'});
+    this.add(bonus);
+    bonus.spawn();
+
+    bonus = new Bonus({class:'playerClass',value:'digger'});
+    this.add(bonus);
+    bonus.spawn();
+
 };
+
+
+Boni.prototype.getBonusFromXY = function(x,y){
+    boni = this.filter(function(bonus){
+        return bonus.x === x && bonus.y === y;
+    });
+
+    if (boni.length === 0) {
+        return null;
+    }
+
+    return boni[0];
+}
 
 
 
