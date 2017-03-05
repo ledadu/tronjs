@@ -134,7 +134,7 @@ Player.prototype.routine = function() {
     }
 
     //Stoping power 2
-    if (this.activatePower2 && this.powerStep >= this.powerDuration*2) {
+    if (this.activatePower2 && this.powerStep >= this.powerDuration*(this.class==='speeder' ? 2 : 1)) {
         this.activatePower2 = false;
         this.powerStep = 0;
     }
@@ -193,7 +193,7 @@ Player.prototype.routine = function() {
             world.bmp[this.x][this.y] != null
         ) {
             if (this.class == 'digger'){
-                if (!this.activatePower) {
+                if (!this.activatePower && !this.activatePower2) {
                     this.kill();
                     world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
                 }

@@ -269,18 +269,34 @@
     };
 
     function playerUpdate(player) {
+
         var darkenColor = darken(player.color, 0.3);
+        previous = {
+            x: player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0),
+            y: player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0),
+        };
+
         if (player.class == 'digger'){
+
             if (player.activatePower) {
+                if (player.activatePower !== players[player.id].activatePower){
+                    App.line(App.ctx, previous.x * world.pixelReso, previous.y * world.pixelReso, previous.x * world.pixelReso, previous.y * world.pixelReso, writeRgbStyle(darkenColor));
+                }
                 App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color, 0.15));
-            } else {
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+            }else if(player.activatePower2){
+                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
+            }else {
+                if (player.activatePower !== players[player.id].activatePower){
+                    App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
+                }else{
+                    App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+                }
             }
         }
 
         if (player.class == 'speeder'){
             if (player.activatePower || player.activatePower2) {
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgb(' + darkenColor.r + ', ' + darkenColor.g + ', ' + darkenColor.b + ')');
+                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
             } else {
                 App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
             }
