@@ -66,7 +66,7 @@ World.prototype.serverRoutine = function() {
         relaunch         = function() {
             setTimeout(function() {
                 that.serverRoutine()
-            }, (11 -that.id));
+            }, (12 -that.id)); // nb world max + 2
         }
 
 
