@@ -26,8 +26,9 @@ var Player = function(options) {
     this.currentCommand = "";
     this.activatePower = false;
     this.powerDuration = 100;
-    this.powerCharge = 300;
+    this.powerMax = 300;
     this.powerStep = 0;
+    this.powerCharge = 0;
     this.step = 0;  //live time
     this.class = null;
     //this.class = "digger";
@@ -64,8 +65,13 @@ Player.prototype.routine = function() {
         socket = this.getSocket();
 
     //inc power step
-    if (this.powerStep < this.powerCharge) {
+    if (this.powerStep < this.powerMax) {
         this.powerStep++;
+    }
+
+    //inc power
+    if (!this.activatePower && !this.activatePower2 & this.powerCharge < this.powerMax) {
+        this.powerCharge++;
     }
 
     if (this.class === 'speeder') {
@@ -106,16 +112,18 @@ Player.prototype.routine = function() {
 
     //Start Power
     if (!_.isNull(this.class) && this.currentCommand == "activatePower") {
-        if (!this.activatePower && this.powerStep >= this.powerCharge/2) {
+        if (!this.activatePower && this.powerCharge >= this.powerMax/2) {
             this.powerStep = 0;
+            this.powerCharge -= this.powerMax/2;
             this.activatePower = true;
         }
     }
 
     //Start Power 2
     if (!_.isNull(this.class) && this.currentCommand == "activatePower2") {
-        if (!this.activatePower2 && this.powerStep >= this.powerCharge) {
+        if (!this.activatePower2 && this.powerCharge >= this.powerMax) {
             this.powerStep = 0;
+            this.powerCharge = 0;
             this.activatePower2 = true;
         }
     }
@@ -225,9 +233,9 @@ function getRandomColor() {
 
 function getRandomColor2() {
     return {
-        r: 64 + Math.round(Math.random()*128),
-        g: 64 + Math.round(Math.random()*128),
-        b: 64 + Math.round(Math.random()*128),
+        r: 128 + Math.round(Math.random()*64),
+        g: 128 + Math.round(Math.random()*64),
+        b: 128 + Math.round(Math.random()*64),
     };i
 }
 

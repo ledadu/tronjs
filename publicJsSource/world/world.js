@@ -102,7 +102,7 @@ function initCanvas(world) {
         if (cc != null) {
             $.each(cc, function(y, pixel) {
                 if (x != null && y != null && pixel != null) {
-                    App.line(x * world.pixelReso, y * world.pixelReso, x * world.pixelReso, y * world.pixelReso, pixel.color);
+                    App.line(App.ctx, x * world.pixelReso, y * world.pixelReso, x * world.pixelReso, y * world.pixelReso, pixel.color);
                 }
             });
         }
@@ -110,15 +110,15 @@ function initCanvas(world) {
 
 }
 //TODO make point function
-App.line = function(x1, y1, x2, y2, color) {
-    App.ctx.beginPath();
-    App.ctx.fillStyle = "solid";
-    App.ctx.lineCap = "round";
-    App.ctx.lineWidth = world.pixelReso + 1;
-    App.ctx.strokeStyle = color;
-    App.ctx.moveTo(x1, y1);
-    App.ctx.lineTo(x2 + 0.01, y2 + 0.01);
-    App.ctx.stroke();
+App.line = function(ctx,x1, y1, x2, y2, color) {
+    ctx.beginPath();
+    ctx.fillStyle = "solid";
+    ctx.lineCap = "round";
+    ctx.lineWidth = world.pixelReso + 1;
+    ctx.strokeStyle = color;
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2 + 0.01, y2 + 0.01);
+    ctx.stroke();
 }
 
 function putmessage(textMess) {
@@ -153,7 +153,7 @@ function refreshLayer() {
     if (!_.isUndefined(currentPlayer)) {
         App.ctx2.fillStyle = 'rgb(0,0,0)';
         App.ctx2.font = "italic 20px Arial";
-        App.ctx2.fillText(Math.round(currentPlayer.powerStep / currentPlayer.powerCharge*100), 50, 100); //in percent
+        App.ctx2.fillText(Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100), 50, 100); //in percent
     }
     // show screen message
     $.each(screenMessages, function(num, mess) {
@@ -177,7 +177,7 @@ function refreshLayer() {
             b: 64 + Math.round(Math.random()*128),
         };
 
-        App.line(bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, writeRgbStyle(color));
+        App.line(App.ctx2, bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, writeRgbStyle(color));
     });
 }
 
@@ -251,9 +251,9 @@ function initSocket() {
     });
 
     //Update all boni
-    socket.on('boniUpdate', function(boni) {
-        this
-        _.each(boni, function(bonus){
+    socket.on('boniUpdate', function(boniList) {
+        boni = {};
+        _.each(boniList, function(bonus){
             bonusUpdate(bonus);
         });
         refreshLayer();
@@ -269,23 +269,23 @@ function playerUpdate(player) {
     var darkenColor = darken(player.color, 0.3);
     if (player.class == 'digger'){
         if (player.activatePower) {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color, 0.15));
+            App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color, 0.15));
         } else {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+            App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
         }
     }
 
     if (player.class == 'speeder'){
         if (player.activatePower || player.activatePower2) {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgb(' + darkenColor.r + ', ' + darkenColor.g + ', ' + darkenColor.b + ')');
+            App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, 'rgb(' + darkenColor.r + ', ' + darkenColor.g + ', ' + darkenColor.b + ')');
         } else {
-            App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+            App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
         }
 
     }
 
     if (_.isNull(player.class)){
-        App.line(player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+        App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
     }
 
     players[player.id] = player;
