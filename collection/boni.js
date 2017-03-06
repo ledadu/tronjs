@@ -11,7 +11,7 @@ var Boni = function(options) {
     this.init(options);
 
 };
-
+//TODO add event collection to catch onadd emitsocket send bonus
 
 //Init
 Boni.prototype.init = function(options){
@@ -26,7 +26,20 @@ Boni.prototype.init = function(options){
     this.add(bonus);
     bonus.spawn();
 
+    return this;
 };
+
+
+Boni.prototype.addRandom = function(options){
+
+    var playerClass = ['speeder', 'digger'];
+
+    bonus = new Bonus({class:'playerClass',value:playerClass[Math.floor(Math.random()*playerClass.length)]});
+    this.add(bonus);
+    bonus.spawn();
+
+    return this;
+}
 
 
 Boni.prototype.getBonusFromXY = function(x,y){

@@ -1,3 +1,43 @@
+/*
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { create: create, update: update, render: render});
+
+var graphics,graphics2;
+
+function create() {
+
+    var text = "- phaser -\n with a sprinkle of \n pixi dust.";
+    var style = { font: "65px Arial", fill: "#ff0044", align: "center" };
+
+    var t = game.add.text(game.world.centerX-300, 0, text, style);
+    circle = new Phaser.Circle(game.world.centerX, 100,64);
+
+
+    graphics = game.add.graphics(0, 0);
+
+    graphics.lineStyle(2, 0xffd900, 1);
+    
+         graphics.beginFill(0xFF0000, 1);
+             graphics.drawCircle(300, 300, 100);
+             graphics.drawCircle(350, 350, 100);
+   graphics2 = game.add.graphics(0, 0);
+
+    graphics2.lineStyle(2, 0xffd900, 1);
+    
+         graphics2.beginFill(0xFF0000, 1);
+             graphics2.drawCircle(100, 100, 100);
+
+
+}
+*/
+
+function update() {
+
+ graphics.angle++;
+}
+
+function render() {
+
+}
 
 
 //TODO clean variable porté
@@ -32,7 +72,11 @@
     });
 
 
-    var App = {};
+    this.game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
+
+    function createGame() {
+
+    }
 
     function doTouchStart() {
         event.preventDefault();
@@ -80,30 +124,28 @@
     }
 
     function initCanvas(world) {
-        App.layer1 = document.createElement('canvas'); //#create the canvas element
-        App.layer1.width = world.width;
-        App.layer1.height = world.height;
-        App.layer1.style.zIndex = 0;
 
-        App.layer2 = document.createElement('canvas'); //#create the canvas element
-        App.layer2.width = world.width;
-        App.layer2.height = world.height;
-        App.layer2.style.zIndex = 1;
+        var that = this;
 
-        App.layer2.addEventListener("touchstart", doTouchStart, false);
+        if(_.isUndefined(this.graphics)) {
+            this.graphics = this.game.add.graphics(0, 0);
+        }
 
-        $("#cnv").width(world.width).height(world.height);
-        $("#cnv").html(App.layer1); //#append it into the DOM
-        $("#cnv").append(App.layer2); //#append it into the DOM
+        if(_.isUndefined(this.graphics2)) {
+            this.graphics2 = this.game.add.graphics(0, 0);
+        }
+ 
+        this.graphics.graphicsData = [];
+        this.graphics2.graphicsData = [];
 
-        App.ctx = App.layer1.getContext("2d");
-        App.ctx2 = App.layer2.getContext("2d");
-
+        //App.layer2.addEventListener("touchstart", doTouchStart, false);
+        //
         $.each(world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (x != null && y != null && pixel != null) {
-                        App.line(App.ctx, x * world.pixelReso, y * world.pixelReso, x * world.pixelReso, y * world.pixelReso, pixel.color);
+                        that.graphics.beginFill(0xFF0000, 1)//pixelcolorr;
+                        that.graphics.drawCircle(x * world.pixelReso, y * world.pixelReso,world.pixelReso);
                     }
                 });
             }
@@ -111,7 +153,7 @@
 
     }
     //TODO make point function
-    App.line = function(ctx,x1, y1, x2, y2, color) {
+/*    App.line = function(ctx,x1, y1, x2, y2, color) {
         ctx.beginPath();
         ctx.fillStyle = "solid";
         ctx.lineCap = "round";
@@ -121,7 +163,7 @@
         ctx.lineTo(x2 + 0.01, y2 + 0.01);
         ctx.stroke();
     }
-
+*/
     function putmessage(textMess) {
         screenMessages.push({text: textMess.text, times: 1000, color: textMess.color});
     };
@@ -137,11 +179,11 @@
     }
 
     function refreshLayer() {
-
+/*
         var currentPlayer = players[currentPlayerId];
 
         //clear screen
-        App.ctx2.clearRect(0, 0, App.ctx2.canvas.width, App.ctx2.canvas.height);
+        //App.ctx2.clearRect(0, 0, App.ctx2.canvas.width, App.ctx2.canvas.height);
 
         App.ctx2.font = "10px Arial";
         App.ctx2.fillStyle = "rgba(0, 0, 0, 0.5)";
@@ -154,7 +196,7 @@
         if (!_.isUndefined(currentPlayer)) {
             App.ctx2.fillStyle = 'rgb(0,0,0)';
             App.ctx2.font = "italic 20px Arial";
-            App.ctx2.fillText(Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100), 50, 100); //in percent
+            App.ctx2.fillText(Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100), 10, 590); //in percent
         }
         // show screen message
         $.each(screenMessages, function(num, mess) {
@@ -170,6 +212,7 @@
             }
         });
 
+*/
         //Show bonus
         _.each(this.boni, function(bonus){
             var color = {
@@ -178,7 +221,8 @@
                 b: 64 + Math.round(Math.random()*128),
             };
 
-            App.line(App.ctx2, bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, writeRgbStyle(color));
+            that.graphics2.beginFill(getIntColor(color), 1);
+            that.graphics2.drawCircle(bonus.x * world.pixelReso, bonus.y * world.pixelReso, world.pixelReso);// writeRgbStyle(color));
         });
     }
 
@@ -269,42 +313,43 @@
     };
 
     function playerUpdate(player) {
-
-        var darkenColor = darken(player.color, 0.3);
+        var darkenColor = darken(player.color, 0.3),
         previous = {
-            x: player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0),
-            y: player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0),
-        };
+            x: (player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0)) * world.pixelReso,
+            y: (player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0)) * world.pixelReso,
+        },
+        playerX = player.x * world.pixelReso,
+        playerY = player.y * world.pixelReso;
 
         if (player.class == 'digger'){
 
             if (player.activatePower) {
                 if (player.activatePower !== players[player.id].activatePower){
-                    App.line(App.ctx, previous.x * world.pixelReso, previous.y * world.pixelReso, previous.x * world.pixelReso, previous.y * world.pixelReso, writeRgbStyle(darkenColor));
+                    this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);// writeRgbStyle(darkenColor));
                 }
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color, 0.15));
+                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);//  writeRgbStyle(player.color, 0.15));
             }else if(player.activatePower2){
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
+                this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
             }else {
                 if (player.activatePower !== players[player.id].activatePower){
-                    App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
+                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
                 }else{
-                    App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
                 }
             }
         }
 
         if (player.class == 'speeder'){
             if (player.activatePower || player.activatePower2) {
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
+                this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
             } else {
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+                this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
             }
 
         }
 
         if (_.isNull(player.class)){
-            App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
+            this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
         }
 
         players[player.id] = player;
@@ -326,6 +371,13 @@
         }
         return 'rgba(' +color.r + ',' + color.g + ',' + color.b + ',' + alpha + ')';
     };
+
+    function getIntColor(color, alpha){
+
+        return parseInt(color.r.toString(16) + color.g.toString(16) + color.b.toString(16),16);
+    };
+
+
 })();
 
 
