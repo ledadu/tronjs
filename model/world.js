@@ -49,6 +49,7 @@ World.prototype.restartWorld = function() {
 
     this.bmp = [];
     console.log("restartWorld");
+    console.log(this.bmp);
     this.ioNamespace.emit('caneva', this.getdata());
     if (!_.isUndefined(this.players)) {
         this.players.spawnAll(this);
@@ -128,13 +129,12 @@ World.prototype.playersRoutine = function() {
 World.prototype.boniRoutine = function() {
     var that = this,
         aBonusHasBeenUpdated = false;
-/*
+
     if (this.heartbeat % 1000 === 0) {
-        bonus = new Bonus();
-        this.boni.add(bonus);
-        bonus.spawn();
+        this.boni.addRandom();
+        this.ioNamespace.emit('boniUpdate', this.boni.list);
     }
-*/
+
     this.boni.each(function(bonus) {
         if (bonus == false) {
             return;
@@ -168,6 +168,7 @@ World.prototype.initSocket = function() {
                     if(!_.isUndefined(session) && !_.isUndefined(session.name)){
                         player.name = session.name;
                     }
+                    //useless ??
             		player.on('playerMove', function(ppp) {
 		            	console.log('playerMove',ppp.name);
         	    	});

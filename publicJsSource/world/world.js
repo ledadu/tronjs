@@ -1,6 +1,13 @@
 
+function update() {
 
-//TODO clean variable porté
+ graphics.angle++;
+}
+
+function render() {
+
+}
+
 
 (function(){
 
@@ -32,7 +39,11 @@
     });
 
 
-    var App = {};
+    this.game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
+
+    function createGame() {
+
+    }
 
     function doTouchStart() {
         event.preventDefault();
@@ -80,50 +91,35 @@
     }
 
     function initCanvas(world) {
-        App.layer1 = document.createElement('canvas'); //#create the canvas element
-        App.layer1.width = world.width;
-        App.layer1.height = world.height;
-        App.layer1.style.zIndex = 0;
 
-        App.layer2 = document.createElement('canvas'); //#create the canvas element
-        App.layer2.width = world.width;
-        App.layer2.height = world.height;
-        App.layer2.style.zIndex = 1;
+        var that = this;
 
-        App.layer2.addEventListener("touchstart", doTouchStart, false);
+        if(_.isUndefined(this.graphics)) {
+            this.graphics = this.game.add.graphics(0, 0);
+        }
 
-        $("#cnv").width(world.width).height(world.height);
-        $("#cnv").html(App.layer1); //#append it into the DOM
-        $("#cnv").append(App.layer2); //#append it into the DOM
+        if(_.isUndefined(this.graphics2)) {
+            this.graphics2 = this.game.add.graphics(0, 0);
+        }
 
-        App.ctx = App.layer1.getContext("2d");
-        App.ctx2 = App.layer2.getContext("2d");
+        //App.layer2.addEventListener("touchstart", doTouchStart, false);
 
+        this.graphics.clear();
         $.each(world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (x != null && y != null && pixel != null) {
-                        App.line(App.ctx, x * world.pixelReso, y * world.pixelReso, x * world.pixelReso, y * world.pixelReso, pixel.color);
+                        that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
+                        that.graphics.drawCircle(x * world.pixelReso, y * world.pixelReso,world.pixelReso);
                     }
                 });
             }
-        });
+        }); 
 
-    }
-    //TODO make point function
-    App.line = function(ctx,x1, y1, x2, y2, color) {
-        ctx.beginPath();
-        ctx.fillStyle = "solid";
-        ctx.lineCap = "round";
-        ctx.lineWidth = world.pixelReso + 1;
-        ctx.strokeStyle = color;
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2 + 0.01, y2 + 0.01);
-        ctx.stroke();
     }
 
     function putmessage(textMess) {
-        screenMessages.push({text: textMess.text, times: 1000, color: textMess.color});
+        screenMessages.push({text: textMess.text, times: 500, color: textMess.color});
     };
 
     function initKeyBinding() {
@@ -138,31 +134,32 @@
 
     function refreshLayer() {
 
-        var currentPlayer = players[currentPlayerId];
+        var that = this,
+            currentPlayer = players[currentPlayerId];
 
-        //clear screen
-        App.ctx2.clearRect(0, 0, App.ctx2.canvas.width, App.ctx2.canvas.height);
+        this.graphics2.clear();
+        this.graphics2.removeChildren();
 
-        App.ctx2.font = "10px Arial";
-        App.ctx2.fillStyle = "rgba(0, 0, 0, 0.5)";
+
         //show player neme
         $.each(players, function(playerName, player) {
-            App.ctx2.fillText(player.name + '(' + player.score + ')', player.x * world.pixelReso, player.y * world.pixelReso);
+            that.graphics2.addChild(that.game.add.text(player.x * world.pixelReso, player.y * world.pixelReso, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff88"}));
         });
+
 
         //Show powerState
         if (!_.isUndefined(currentPlayer)) {
-            App.ctx2.fillStyle = 'rgb(0,0,0)';
-            App.ctx2.font = "italic 20px Arial";
-            App.ctx2.fillText(Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100), 50, 100); //in percent
+            that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
         }
+
         // show screen message
         $.each(screenMessages, function(num, mess) {
-            alpha = (mess.times / 1000);
-            color = mess.color;
-            App.ctx2.fillStyle = writeRgbStyle(color, alpha);
-            App.ctx2.font = "italic 20px Arial";
-            App.ctx2.fillText(mess.text, 50, 50 + num * 50);
+            var alpha     = (mess.times / 500),
+                color     = mess.color,
+                fillStyle = writeRgbStyle(color, alpha),
+                font      = "italic 20px Arial";
+
+            that.graphics2.addChild(that.game.add.text(20, 20 + num *20 ,mess.text, {font: font, fill: fillStyle}));
             mess.times -= 5;
 
             if (mess.times < 10) {
@@ -178,7 +175,8 @@
                 b: 64 + Math.round(Math.random()*128),
             };
 
-            App.line(App.ctx2, bonus.x * world.pixelReso, bonus.y * world.pixelReso, bonus.x * world.pixelReso, bonus.y * world.pixelReso, writeRgbStyle(color));
+            that.graphics2.beginFill(getIntColor(color), 1);
+            that.graphics2.drawCircle(bonus.x * world.pixelReso, bonus.y * world.pixelReso, world.pixelReso);// writeRgbStyle(color));
         });
     }
 
@@ -230,7 +228,7 @@
         //Reset caneva by server
         socket.on('caneva', function(worldObj) {
             world = worldObj;
-        players = {};
+            players = {};
             initCanvas(world);
         });
 
@@ -270,42 +268,11 @@
 
     function playerUpdate(player) {
 
-        var darkenColor = darken(player.color, 0.3);
-        previous = {
-            x: player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0),
-            y: player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0),
-        };
+        var playerX = player.x * world.pixelReso,
+            playerY = player.y * world.pixelReso;
 
-        if (player.class == 'digger'){
-
-            if (player.activatePower) {
-                if (player.activatePower !== players[player.id].activatePower){
-                    App.line(App.ctx, previous.x * world.pixelReso, previous.y * world.pixelReso, previous.x * world.pixelReso, previous.y * world.pixelReso, writeRgbStyle(darkenColor));
-                }
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color, 0.15));
-            }else if(player.activatePower2){
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
-            }else {
-                if (player.activatePower !== players[player.id].activatePower){
-                    App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
-                }else{
-                    App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
-                }
-            }
-        }
-
-        if (player.class == 'speeder'){
-            if (player.activatePower || player.activatePower2) {
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(darkenColor));
-            } else {
-                App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
-            }
-
-        }
-
-        if (_.isNull(player.class)){
-            App.line(App.ctx, player.x * world.pixelReso, player.y * world.pixelReso, player.x * world.pixelReso, player.y * world.pixelReso, writeRgbStyle(player.color));
-        }
+        this.graphics.beginFill(getIntColor(player.color), player.color.a);
+        this.graphics.drawCircle(playerX, playerY, world.pixelReso);
 
         players[player.id] = player;
     };
@@ -320,12 +287,29 @@
         });
     };
 
+    function lighten(color,force) {
+        return _.mapObject(color, function(value) {
+            return Math.round(value + force * (255-value));
+        });
+    };
+
+
     function writeRgbStyle(color, alpha){
         if (_.isUndefined(alpha)) {
             return 'rgb(' +color.r + ',' + color.g + ',' + color.b + ')';
         }
         return 'rgba(' +color.r + ',' + color.g + ',' + color.b + ',' + alpha + ')';
     };
+
+    function getIntColor(color, alpha){
+
+        var toHex = function(int){return (int < 16 ? '0' : '') + int.toString(16);},
+            colorHex = toHex(color.r) + toHex(color.g) + toHex(color.b);
+
+        return parseInt(colorHex,16);
+    };
+
+
 })();
 
 

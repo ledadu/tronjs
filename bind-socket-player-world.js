@@ -9,7 +9,7 @@ function BindSocketPlayerWorld(socket, world, player) {
 BindSocketPlayerWorld.prototype.bindInput = function() {
     var that = this;
     that.socket.on('keydown', function(data) {
-        console.log('keydown',data);
+        console.log('keydown',that.player.name,data.keyFunction);
         that._executePlayerFunction(data, that.world);
     });
 

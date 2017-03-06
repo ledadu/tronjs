@@ -72,8 +72,9 @@ function logthis(){
 
  en mode pvp :
  idee bonus
- * rocket
- * laser
+ * rocket + laser
+ * invincibility
+ * bonus hidden
  idee neutrus
  * mode rainbow
  idee malus

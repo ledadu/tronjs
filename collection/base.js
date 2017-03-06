@@ -16,10 +16,12 @@ var Collection_base = function(options){
 
 util.inherits(Collection_base, EventEmitter);
 
+
 Collection_base.prototype.add = function(model) {
     var that = this;
     model.getCollection = function(){return that;};
     this.list[model.id] = model;
+    this.emit('add',model);
 };
 
 Collection_base.prototype.remove = function(model) {
