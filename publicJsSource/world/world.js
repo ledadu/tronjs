@@ -15,14 +15,14 @@ function create() {
     graphics = game.add.graphics(0, 0);
 
     graphics.lineStyle(2, 0xffd900, 1);
-    
+
          graphics.beginFill(0xFF0000, 1);
              graphics.drawCircle(300, 300, 100);
              graphics.drawCircle(350, 350, 100);
    graphics2 = game.add.graphics(0, 0);
 
     graphics2.lineStyle(2, 0xffd900, 1);
-    
+
          graphics2.beginFill(0xFF0000, 1);
              graphics2.drawCircle(100, 100, 100);
 
@@ -134,9 +134,8 @@ function render() {
         if(_.isUndefined(this.graphics2)) {
             this.graphics2 = this.game.add.graphics(0, 0);
         }
- 
-        this.graphics.graphicsData = [];
-        this.graphics2.graphicsData = [];
+
+        this.graphics.clear();
 
         //App.layer2.addEventListener("touchstart", doTouchStart, false);
         //
@@ -165,7 +164,7 @@ function render() {
     }
 */
     function putmessage(textMess) {
-        screenMessages.push({text: textMess.text, times: 1000, color: textMess.color});
+        screenMessages.push({text: textMess.text, times: 500, color: textMess.color});
     };
 
     function initKeyBinding() {
@@ -179,32 +178,33 @@ function render() {
     }
 
     function refreshLayer() {
-/*
-        var currentPlayer = players[currentPlayerId];
 
-        //clear screen
-        //App.ctx2.clearRect(0, 0, App.ctx2.canvas.width, App.ctx2.canvas.height);
+        var that = this,
+            currentPlayer = players[currentPlayerId];
 
-        App.ctx2.font = "10px Arial";
-        App.ctx2.fillStyle = "rgba(0, 0, 0, 0.5)";
+        this.graphics2.clear();
+        this.graphics2.removeChildren();
+
+
         //show player neme
         $.each(players, function(playerName, player) {
-            App.ctx2.fillText(player.name + '(' + player.score + ')', player.x * world.pixelReso, player.y * world.pixelReso);
+            that.graphics2.addChild(that.game.add.text(player.x * world.pixelReso, player.y * world.pixelReso, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff88"}));
         });
+
 
         //Show powerState
         if (!_.isUndefined(currentPlayer)) {
-            App.ctx2.fillStyle = 'rgb(0,0,0)';
-            App.ctx2.font = "italic 20px Arial";
-            App.ctx2.fillText(Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100), 10, 590); //in percent
+            that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
         }
+
         // show screen message
         $.each(screenMessages, function(num, mess) {
-            alpha = (mess.times / 1000);
-            color = mess.color;
-            App.ctx2.fillStyle = writeRgbStyle(color, alpha);
-            App.ctx2.font = "italic 20px Arial";
-            App.ctx2.fillText(mess.text, 50, 50 + num * 50);
+            var alpha     = (mess.times / 500),
+                color     = mess.color,
+                fillStyle = writeRgbStyle(color, alpha),
+                font      = "italic 20px Arial";
+
+            that.graphics2.addChild(that.game.add.text(20, 20 + num *20 ,mess.text, {font: font, fill: fillStyle}));
             mess.times -= 5;
 
             if (mess.times < 10) {
@@ -212,7 +212,6 @@ function render() {
             }
         });
 
-*/
         //Show bonus
         _.each(this.boni, function(bonus){
             var color = {
@@ -381,7 +380,7 @@ function render() {
     };
 
     function getIntColor(color, alpha){
-        
+
         var toHex = function(int){return (int < 16 ? '0' : '') + int.toString(16);},
             colorHex = toHex(color.r) + toHex(color.g) + toHex(color.b);
 
