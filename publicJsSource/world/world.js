@@ -75,7 +75,7 @@ function render() {
     this.game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
 
     function createGame() {
-        this.game.stage.backgroundColor = "#eee";
+        //this.game.stage.backgroundColor = "#eee";
     }
 
     function doTouchStart() {
@@ -321,7 +321,6 @@ function render() {
         playerX = player.x * world.pixelReso,
         playerY = player.y * world.pixelReso;
 
-        console.log(player.color,darkenColor);
         if (player.class == 'digger'){
 
             if (player.activatePower) {
