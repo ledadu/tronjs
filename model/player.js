@@ -39,6 +39,7 @@ var Player = function(options) {
 //Player.prototype = new EventEmitter();
 util.inherits(Player, EventEmitter);
 
+
 Player.prototype.kill = function() {
     this.direction = "dead";
     console.log("kill player");
@@ -218,9 +219,41 @@ Player.prototype.routine = function() {
 
 };
 
+Player.prototype.initPlayerColor = function() {
+    var palette = [
+        '9E4A08',   //orange
+        '000b94',   //blue
+        '947400',   //yellow
+        '77089e',   //purple
+        '08899e',   //light blue
+        '870000',   //red
+        '00872a',   //green
+    ],
+//        playerIndex = _.keys(this.getCollection().list).indexOf(this.id);
+        playerIndex = Math.round(Math.random() * palette.length);
 
+    this.color = hexToColor(palette[playerIndex]);
+    return true;
+}
 
 module.exports = Player;
+
+function hexToColor(hex) {
+    if (_.isUndefined(hex)) {
+        return {
+            r: 128,
+            g: 128,
+            b: 128,
+        };
+    }
+    var hexCutted = hex.match(/.{1,2}/g);
+    return {
+        r: parseInt(hexCutted[0],16),
+        g: parseInt(hexCutted[1],16),
+        b: parseInt(hexCutted[2],16),
+    };
+}
+
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
@@ -231,12 +264,14 @@ function getRandomColor() {
     return color;
 }
 
+
+
 function getRandomColor2() {
     return {
         r: 128 + Math.round(Math.random()*64),
         g: 128 + Math.round(Math.random()*64),
         b: 128 + Math.round(Math.random()*64),
-    };i
+    };
 }
 
 

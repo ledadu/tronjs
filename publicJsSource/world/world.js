@@ -75,7 +75,7 @@ function render() {
     this.game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
 
     function createGame() {
-
+        this.game.stage.backgroundColor = "#eee";
     }
 
     function doTouchStart() {
@@ -313,7 +313,7 @@ function render() {
     };
 
     function playerUpdate(player) {
-        var darkenColor = darken(player.color, 0.3),
+        var darkenColor = darken(player.color, 0.5),
         previous = {
             x: (player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0)) * world.pixelReso,
             y: (player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0)) * world.pixelReso,
@@ -321,19 +321,25 @@ function render() {
         playerX = player.x * world.pixelReso,
         playerY = player.y * world.pixelReso;
 
+        console.log(player.color,darkenColor);
         if (player.class == 'digger'){
 
             if (player.activatePower) {
                 if (player.activatePower !== players[player.id].activatePower){
+                    this.graphics.beginFill(getIntColor(darkenColor), 1);
                     this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);// writeRgbStyle(darkenColor));
                 }
+                    this.graphics.beginFill(getIntColor(player.color), 0.15);
                     this.graphics.drawCircle(playerX, playerY, world.pixelReso);//  writeRgbStyle(player.color, 0.15));
             }else if(player.activatePower2){
+                this.graphics.beginFill(getIntColor(darkenColor), 1);
                 this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
             }else {
                 if (player.activatePower !== players[player.id].activatePower){
+                    this.graphics.beginFill(getIntColor(darkenColor), 1);
                     this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
                 }else{
+                    this.graphics.beginFill(getIntColor(player.color), 1);
                     this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
                 }
             }
@@ -341,14 +347,17 @@ function render() {
 
         if (player.class == 'speeder'){
             if (player.activatePower || player.activatePower2) {
+                this.graphics.beginFill(getIntColor(darkenColor), 1);
                 this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
             } else {
+                this.graphics.beginFill(getIntColor(player.color), 1);
                 this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
             }
 
         }
 
         if (_.isNull(player.class)){
+            this.graphics.beginFill(getIntColor(player.color), 1);
             this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
         }
 
@@ -373,8 +382,11 @@ function render() {
     };
 
     function getIntColor(color, alpha){
+        
+        var toHex = function(int){return (int < 16 ? '0' : '') + int.toString(16);},
+            colorHex = toHex(color.r) + toHex(color.g) + toHex(color.b);
 
-        return parseInt(color.r.toString(16) + color.g.toString(16) + color.b.toString(16),16);
+        return parseInt(colorHex,16);
     };
 
 
