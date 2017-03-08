@@ -138,13 +138,12 @@ function render() {
         this.graphics.clear();
 
         //App.layer2.addEventListener("touchstart", doTouchStart, false);
-        //
         $.each(world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (x != null && y != null && pixel != null) {
-                        that.graphics.beginFill(getIntColor(pixel.color), 1);
-                        console.log(pixel);
+                        that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
+                        console.log(pixel.color.a);
                         that.graphics.drawCircle(x * world.pixelReso, y * world.pixelReso,world.pixelReso);
                     }
                 });
@@ -152,18 +151,7 @@ function render() {
         });
 
     }
-    //TODO make point function
-/*    App.line = function(ctx,x1, y1, x2, y2, color) {
-        ctx.beginPath();
-        ctx.fillStyle = "solid";
-        ctx.lineCap = "round";
-        ctx.lineWidth = world.pixelReso + 1;
-        ctx.strokeStyle = color;
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2 + 0.01, y2 + 0.01);
-        ctx.stroke();
-    }
-*/
+
     function putmessage(textMess) {
         screenMessages.push({text: textMess.text, times: 500, color: textMess.color});
     };
@@ -313,53 +301,15 @@ function render() {
     };
 
     function playerUpdate(player) {
-        var darkenColor  = darken(player.color, 0.5),
-            lightenColor = lighten(player.color, 0.5),
-        previous = {
+        var previous = {
             x: (player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0)) * world.pixelReso,
             y: (player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0)) * world.pixelReso,
         },
         playerX = player.x * world.pixelReso,
         playerY = player.y * world.pixelReso;
-
-        if (player.class == 'digger'){
-
-            if (player.activatePower) {
-                if (player.activatePower !== players[player.id].activatePower){
-                    this.graphics.beginFill(getIntColor(darkenColor), 1);
-                    this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);
-                }
-                    this.graphics.beginFill(getIntColor(player.color), 0.15);
-                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);
-            }else if(player.activatePower2){
-                this.graphics.beginFill(getIntColor(lightenColor), 1);
-                this.graphics.drawCircle(playerX, playerY, world.pixelReso);
-            }else {
-                if (player.activatePower !== players[player.id].activatePower){
-                    this.graphics.beginFill(getIntColor(darkenColor), 1);
-                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);
-                }else{
-                    this.graphics.beginFill(getIntColor(player.color), 1);
-                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);
-                }
-            }
-        }
-
-        if (player.class == 'speeder'){
-            if (player.activatePower || player.activatePower2) {
-                this.graphics.beginFill(getIntColor(lightenColor), 1);
-                this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
-            } else {
-                this.graphics.beginFill(getIntColor(player.color), 1);
-                this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
-            }
-
-        }
-
-        if (_.isNull(player.class)){
-            this.graphics.beginFill(getIntColor(player.color), 1);
-            this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
-        }
+    
+        this.graphics.beginFill(getIntColor(player.color), player.color.a);
+        this.graphics.drawCircle(playerX, playerY, world.pixelReso);
 
         players[player.id] = player;
     };

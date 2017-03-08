@@ -191,7 +191,7 @@ Player.prototype.routine = function() {
         if (
             this.x < 0 || this.x * world.pixelReso > world.width ||
             this.y < 0 || this.y * world.pixelReso > world.height ||
-            world.bmp[this.x][this.y] != null
+            world.bmp[this.x][this.y] != null && world.bmp[this.x][this.y].color.solid
         ) {
             if (this.class == 'digger'){
                 if (!this.activatePower && !this.activatePower2) {
@@ -207,13 +207,48 @@ Player.prototype.routine = function() {
     }
 
     //Manage Bitmap change
+
+    this.color = this.baseColor;
+    this.color.a = 1;
+    this.color.solid = true;
+
+    var previous = {
+            x: (this.x + (this.direction === 'left' ? 1 : 0) + (this.direction === 'right' ? -1 : 0)),
+            y: (this.y + (this.direction === 'up'   ? 1 : 0) + (this.direction === 'down'  ? -1 : 0))
+        },
+        darkenColor  = darken(this.color, 0.5),
+        lightenColor = lighten(this.color, 0.5);
+
     if (this.class == 'digger'){
-        if (!this.activatePower) {
-            world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
+
+        if (this.activatePower) {
+           /* if (this.activatePower !== players[this.id].activatePower){
+                world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
+
+                this.graphics.beginFill(getIntColor(darkenColor), 1);
+                this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);
+            }*/
+                
+                this.color.a = 0.15;
+                this.color.solid = false;
+        }else if(this.activatePower2){
+                this.color = lightenColor;
+        }else {
+            /*if (this.activatePower !== players[this.id].activatePower){
+                this.graphics.beginFill(getIntColor(darkenColor), 1);
+                this.graphics.drawCircle(thisX, thisY, world.pixelReso);
+            }else{*/
+            //}
         }
-    } else {
-        world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
     }
+
+    if (this.class == 'speeder'){
+        if (this.activatePower || this.activatePower2) {
+            this.color = lightenColor;
+        }
+
+    }
+    world.bmp[this.x][this.y] = {playerid :this.id ,color:_.clone(this.color)};
 
     return true;
 
@@ -232,7 +267,7 @@ Player.prototype.initPlayerColor = function() {
 //        playerIndex = _.keys(this.getCollection().list).indexOf(this.id);
         playerIndex = Math.round(Math.random() * palette.length);
 
-    this.color = hexToColor(palette[playerIndex]);
+    this.baseColor = hexToColor(palette[playerIndex]);
     return true;
 }
 
@@ -244,6 +279,7 @@ function hexToColor(hex) {
             r: 128,
             g: 128,
             b: 128,
+            a: 1,
         };
     }
     var hexCutted = hex.match(/.{1,2}/g);
@@ -274,4 +310,16 @@ function getRandomColor2() {
     };
 }
 
+
+function darken(color,force) {
+    return _.mapObject(_.clone(color), function(value) {
+        return Math.round(value - force * value);
+    });
+};
+
+function lighten(color,force) {
+    return _.mapObject(_.clone(color), function(value) {
+        return Math.round(value + force * (255-value));
+    });
+};
 

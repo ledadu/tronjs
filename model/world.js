@@ -49,6 +49,7 @@ World.prototype.restartWorld = function() {
 
     this.bmp = [];
     console.log("restartWorld");
+    console.log(this.bmp);
     this.ioNamespace.emit('caneva', this.getdata());
     if (!_.isUndefined(this.players)) {
         this.players.spawnAll(this);
