@@ -143,7 +143,8 @@ function render() {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (x != null && y != null && pixel != null) {
-                        that.graphics.beginFill(0xFF0000, 1)//pixelcolorr;
+                        that.graphics.beginFill(getIntColor(pixel.color), 1);
+                        console.log(pixel);
                         that.graphics.drawCircle(x * world.pixelReso, y * world.pixelReso,world.pixelReso);
                     }
                 });
@@ -312,7 +313,8 @@ function render() {
     };
 
     function playerUpdate(player) {
-        var darkenColor = darken(player.color, 0.5),
+        var darkenColor  = darken(player.color, 0.5),
+            lightenColor = lighten(player.color, 0.5),
         previous = {
             x: (player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0)) * world.pixelReso,
             y: (player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0)) * world.pixelReso,
@@ -325,27 +327,27 @@ function render() {
             if (player.activatePower) {
                 if (player.activatePower !== players[player.id].activatePower){
                     this.graphics.beginFill(getIntColor(darkenColor), 1);
-                    this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);// writeRgbStyle(darkenColor));
+                    this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);
                 }
                     this.graphics.beginFill(getIntColor(player.color), 0.15);
-                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);//  writeRgbStyle(player.color, 0.15));
+                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);
             }else if(player.activatePower2){
-                this.graphics.beginFill(getIntColor(darkenColor), 1);
-                this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
+                this.graphics.beginFill(getIntColor(lightenColor), 1);
+                this.graphics.drawCircle(playerX, playerY, world.pixelReso);
             }else {
                 if (player.activatePower !== players[player.id].activatePower){
                     this.graphics.beginFill(getIntColor(darkenColor), 1);
-                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
+                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);
                 }else{
                     this.graphics.beginFill(getIntColor(player.color), 1);
-                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(player.color));
+                    this.graphics.drawCircle(playerX, playerY, world.pixelReso);
                 }
             }
         }
 
         if (player.class == 'speeder'){
             if (player.activatePower || player.activatePower2) {
-                this.graphics.beginFill(getIntColor(darkenColor), 1);
+                this.graphics.beginFill(getIntColor(lightenColor), 1);
                 this.graphics.drawCircle(playerX, playerY, world.pixelReso);//   writeRgbStyle(darkenColor));
             } else {
                 this.graphics.beginFill(getIntColor(player.color), 1);
@@ -371,6 +373,13 @@ function render() {
             return Math.round(value - force * value);
         });
     };
+
+    function lighten(color,force) {
+        return _.mapObject(color, function(value) {
+            return Math.round(value + force * (255-value));
+        });
+    };
+
 
     function writeRgbStyle(color, alpha){
         if (_.isUndefined(alpha)) {
