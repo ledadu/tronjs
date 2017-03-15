@@ -1,34 +1,3 @@
-/*
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { create: create, update: update, render: render});
-
-var graphics,graphics2;
-
-function create() {
-
-    var text = "- phaser -\n with a sprinkle of \n pixi dust.";
-    var style = { font: "65px Arial", fill: "#ff0044", align: "center" };
-
-    var t = game.add.text(game.world.centerX-300, 0, text, style);
-    circle = new Phaser.Circle(game.world.centerX, 100,64);
-
-
-    graphics = game.add.graphics(0, 0);
-
-    graphics.lineStyle(2, 0xffd900, 1);
-
-         graphics.beginFill(0xFF0000, 1);
-             graphics.drawCircle(300, 300, 100);
-             graphics.drawCircle(350, 350, 100);
-   graphics2 = game.add.graphics(0, 0);
-
-    graphics2.lineStyle(2, 0xffd900, 1);
-
-         graphics2.beginFill(0xFF0000, 1);
-             graphics2.drawCircle(100, 100, 100);
-
-
-}
-*/
 
 function update() {
 
@@ -39,8 +8,6 @@ function render() {
 
 }
 
-
-//TODO clean variable porté
 
 (function(){
 
@@ -75,7 +42,7 @@ function render() {
     this.game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
 
     function createGame() {
-        //this.game.stage.backgroundColor = "#eee";
+
     }
 
     function doTouchStart() {
@@ -135,20 +102,19 @@ function render() {
             this.graphics2 = this.game.add.graphics(0, 0);
         }
 
-        this.graphics.clear();
-
         //App.layer2.addEventListener("touchstart", doTouchStart, false);
+
+        this.graphics.clear();
         $.each(world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (x != null && y != null && pixel != null) {
                         that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
-                        console.log(pixel.color.a);
                         that.graphics.drawCircle(x * world.pixelReso, y * world.pixelReso,world.pixelReso);
                     }
                 });
             }
-        });
+        }); 
 
     }
 
@@ -262,7 +228,7 @@ function render() {
         //Reset caneva by server
         socket.on('caneva', function(worldObj) {
             world = worldObj;
-        players = {};
+            players = {};
             initCanvas(world);
         });
 
@@ -301,13 +267,10 @@ function render() {
     };
 
     function playerUpdate(player) {
-        var previous = {
-            x: (player.x + (player.direction === 'left' ? 1 : 0) + (player.direction === 'right' ? -1 : 0)) * world.pixelReso,
-            y: (player.y + (player.direction === 'up'   ? 1 : 0) + (player.direction === 'down'  ? -1 : 0)) * world.pixelReso,
-        },
-        playerX = player.x * world.pixelReso,
-        playerY = player.y * world.pixelReso;
-    
+
+        var playerX = player.x * world.pixelReso,
+            playerY = player.y * world.pixelReso;
+
         this.graphics.beginFill(getIntColor(player.color), player.color.a);
         this.graphics.drawCircle(playerX, playerY, world.pixelReso);
 
