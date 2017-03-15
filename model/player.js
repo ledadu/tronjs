@@ -31,6 +31,7 @@ var Player = function(options) {
     this.powerCharge = 0;
     this.step = 0;  //live time
     this.class = null;
+    this.class = "shooter";
     //this.class = "digger";
     //this.class = "speeder";
     //construct
@@ -75,6 +76,7 @@ Player.prototype.routine = function() {
         this.powerCharge++;
     }
 
+    //Step bypass
     if (this.class === 'speeder') {
         //normal speed
         if (world.heartbeat % 2 !== 0 && !this.activatePower2 && !this.activatePower) {
@@ -219,35 +221,36 @@ Player.prototype.routine = function() {
         darkenColor  = darken(this.color, 0.5),
         lightenColor = lighten(this.color, 0.5);
 
+    //Digger class
     if (this.class == 'digger'){
 
         if (this.activatePower) {
-           /* if (this.activatePower !== players[this.id].activatePower){
-                world.bmp[this.x][this.y] = {playerid :this.id ,color:this.color};
 
-                this.graphics.beginFill(getIntColor(darkenColor), 1);
-                this.graphics.drawCircle(previous.x, previous.y, world.pixelReso);
-            }*/
-                
-                this.color.a = 0.15;
-                this.color.solid = false;
+            if(this.powerStep === 0) {
+                world.bmp[previous.x][previous.y] = {playerid :this.id ,color:_.clone(darkenColor)};
+                world.ioNamespace.emit('updateBmpPixel', {x: previous.x, y: previous.y, content: world.bmp[previous.x][previous.y]});
+            } 
+            this.color.a = 0.15;
+            this.color.solid = false;
         }else if(this.activatePower2){
                 this.color = lightenColor;
         }else {
-            /*if (this.activatePower !== players[this.id].activatePower){
-                this.graphics.beginFill(getIntColor(darkenColor), 1);
-                this.graphics.drawCircle(thisX, thisY, world.pixelReso);
-            }else{*/
-            //}
+            if(this.powerStep === 0) {
+                this.color = darkenColor;
+            } 
+
         }
     }
 
+    //Speeder class
     if (this.class == 'speeder'){
         if (this.activatePower || this.activatePower2) {
             this.color = lightenColor;
         }
 
     }
+
+    //No class
     world.bmp[this.x][this.y] = {playerid :this.id ,color:_.clone(this.color)};
 
     return true;

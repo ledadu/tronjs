@@ -32,7 +32,7 @@ function render() {
     var socket;
     $(document).ready(function() {
 
-       that.initSocket();
+        that.initSocket();
         initKeyBinding();
         bindChangeName();
 
@@ -90,7 +90,7 @@ function render() {
 
     }
 
-    function initCanvas(world) {
+    function initWorld(world) {
 
         var that = this;
 
@@ -176,7 +176,7 @@ function render() {
             };
 
             that.graphics2.beginFill(getIntColor(color), 1);
-            that.graphics2.drawCircle(bonus.x * world.pixelReso, bonus.y * world.pixelReso, world.pixelReso);// writeRgbStyle(color));
+            that.graphics2.drawCircle(bonus.x * world.pixelReso, bonus.y * world.pixelReso, world.pixelReso);
         });
     }
 
@@ -226,10 +226,17 @@ function render() {
         });
 
         //Reset caneva by server
-        socket.on('caneva', function(worldObj) {
+        socket.on('initWorld', function(worldObj) {
             world = worldObj;
             players = {};
-            initCanvas(world);
+            initWorld(world);
+        });
+
+        socket.on('updateBmpPixel', function(bmpPixel) {
+//            world[bmpPixel.x][bmpPixel.y] = bmpPixel.content;
+            that.graphics.beginFill(getIntColor(bmpPixel.content.color), bmpPixel.content.color.a);
+            that.graphics.drawCircle(bmpPixel.x * world.pixelReso, bmpPixel.y * world.pixelReso,world.pixelReso);
+
         });
 
         //Update all players
@@ -286,13 +293,6 @@ function render() {
             return Math.round(value - force * value);
         });
     };
-
-    function lighten(color,force) {
-        return _.mapObject(color, function(value) {
-            return Math.round(value + force * (255-value));
-        });
-    };
-
 
     function writeRgbStyle(color, alpha){
         if (_.isUndefined(alpha)) {

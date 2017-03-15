@@ -17,16 +17,16 @@ var World = function(httpServer, io, idWorld) {
 
     //construct
     this.id = idWorld;
-    this.width = 800;
-    this.height = 600;
-    this.bmp = [];
-    this.pixelReso = 5; 
-    this.players = new Players({parent: this});
-    this.boni    = new Boni({parent:this});
+    this.width       = 800;
+    this.height      = 600;
+    this.pixelReso   = 5; 
+    this.bmp         = [];
+    this.players     = new Players({parent: this});
+    this.boni        = new Boni({parent:this});
     this.ioNamespace = io;
-    this.httpServer = httpServer;
-    this.gameMode = "DM";
-    this.heartbeat = 0;
+    this.httpServer  = httpServer;
+    this.gameMode    = "DM";
+    this.heartbeat   = 0;
 };
 
 //  export World attributes
@@ -48,9 +48,9 @@ World.prototype.restartWorld = function() {
     this.heartbeat = 0;
 
     this.bmp = [];
+
     console.log("restartWorld");
-    console.log(this.bmp);
-    this.ioNamespace.emit('caneva', this.getdata());
+    this.ioNamespace.emit('initWorld', this.getdata());
     if (!_.isUndefined(this.players)) {
         this.players.spawnAll(this);
     }
@@ -176,7 +176,7 @@ World.prototype.initSocket = function() {
 
                     console.log('Got connect!', player.id, player.name);
 
-                    socket.emit('caneva', that.getdata());
+                    socket.emit('initWorld', that.getdata());
 
                     socket.emit('boniUpdate', that.boni.list);
                     
