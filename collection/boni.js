@@ -28,11 +28,9 @@ Boni.prototype._prototype = function() {
         
         bonus = new Bonus({class:'playerClass',value:'speeder'});
         this.add(bonus);
-        bonus.spawn();
 
         bonus = new Bonus({class:'playerClass',value:'digger'});
         this.add(bonus);
-        bonus.spawn();
 
         return this;
     };
@@ -45,7 +43,6 @@ Boni.prototype.addRandom = function(options){
 
     bonus = new Bonus({class:'playerClass',value:playerClass[Math.floor(Math.random()*playerClass.length)]});
     this.add(bonus);
-    bonus.spawn();
 
     return this;
 };

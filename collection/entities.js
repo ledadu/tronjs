@@ -6,6 +6,7 @@ var Entities = function(options) {
     var Collection_base = require('./base');
     extend(true, this, new Collection_base(options));
 
+    this.on('add', function(entity){entity.spawn();});
 
 };
 

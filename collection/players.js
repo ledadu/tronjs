@@ -6,7 +6,7 @@ var Players = function(options) {
     var Collection_base = require('./entities');
     extend(true, this, new Collection_base(options));
 
-    this.on('add', function(player){player.initPlayerColor();})
+    this.on('add', function(player){player.initPlayerColor();});
 };
 
 
