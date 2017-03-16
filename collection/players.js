@@ -3,18 +3,12 @@ var extend = require('extend');
 
 var Players = function(options) {
 
-    var Collection_base = require('./base');
+    var Collection_base = require('./entities');
     extend(true, this, new Collection_base(options));
 
     this.on('add', function(player){player.initPlayerColor();})
 };
 
-
-Players.prototype.spawnAll = function (world) {
-    this.each(function(p) {
-        p.spawn(world);
-    });
-};
 
 Players.prototype.getPlayersNotDead = function() {
 

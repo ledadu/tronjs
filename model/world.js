@@ -181,7 +181,7 @@ World.prototype.initSocket = function() {
                     socket.emit('boniUpdate', that.boni.list);
                     
                     that.players.add(player);
-                    player.spawn(that);
+                    player.spawn();
 
                     var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
                     bindSocketPlayerWorld.bindInput();

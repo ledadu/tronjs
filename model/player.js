@@ -47,7 +47,10 @@ Player.prototype.kill = function() {
     this.emit('playerMove',this);
 };
 
-Player.prototype.spawn = function(world) {
+Player.prototype.spawn = function() {
+
+    var world = this.getCollection().getParent();
+
     this.class = null;
     this.direction = _.sample(this.directionlist);
     this.x = 1/4 * world.width / world.pixelReso  +  Math.floor((world.width / world.pixelReso * 1/2) * Math.random());
@@ -101,7 +104,7 @@ Player.prototype.routine = function() {
     //------- Start player move ---------
     
     //get bonus
-    var touchedBonus = world.boni.getBonusFromXY(this.x,this.y);
+    var touchedBonus = world.boni.getEntityFromXY(this.x,this.y);
     if (!_.isNull(touchedBonus)) {
         //Apply player class of bonus
         if (touchedBonus.class === 'playerClass') {

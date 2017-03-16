@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var extend = require('extend');
 
-var Bonus = function(options) {
+var Entity = function(options) {
 
     options = options || {};
 
@@ -10,23 +10,22 @@ var Bonus = function(options) {
 
     this.id    = this.makeid();
     this.class = options.class;
-    this.value = options.value;
+    this.x     = options.x;
+    this.y     = options.y;
 
-    this.name = this.id;
-    this.x = 50;
-    this.y = 50;
+    this.name = this.class + '-' + this.id;
 }
 
-Bonus.prototype.spawn = function() {
+Entity.prototype.spawn = function() {
     var world = this.getCollection().getParent();
     this.x = 1/4 * world.width / world.pixelReso  +  Math.floor((world.width / world.pixelReso * 1/2) * Math.random());
     this.y = 1/4 * world.height / world.pixelReso  +  Math.floor((world.height / world.pixelReso * 1/2) * Math.random());
 };
 
 
-Bonus.prototype.routine = function() {
+Entity.prototype.routine = function() {
     return false;
 }
 
-module.exports = Bonus;
+module.exports = Entity;
 
