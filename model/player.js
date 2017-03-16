@@ -67,7 +67,8 @@ Player.prototype.spawn = function() {
 Player.prototype.routine = function() {
 
     var world  = this.getCollection().getParent(),
-        socket = this.getSocket();
+        socket = this.getSocket()
+        stepBypass = world.pixelReso;
 
     //inc power step
     if (this.powerStep < this.powerMax) {
@@ -82,22 +83,22 @@ Player.prototype.routine = function() {
     //Step bypass
     if (this.class === 'speeder') {
         //normal speed
-        if (world.heartbeat % 2 !== 0 && !this.activatePower2 && !this.activatePower) {
+        if (world.heartbeat % (stepBypass*2) !== 0 && !this.activatePower2 && !this.activatePower) {
             return false;
         }
         //lower speed
-        if (world.heartbeat % 4 !== 0 && !this.activatePower2 && this.activatePower) {
+        if (world.heartbeat % (stepBypass*4) !== 0 && !this.activatePower2 && this.activatePower) {
             return false;
         }
         //else fast speed
     } else {
-        if (world.heartbeat % 2 !== 0) {
+        if (world.heartbeat % (stepBypass*2) !== 0) {
             return false;
         }
     }
 
     // sync move speed with pixelReso
-    if (world.heartbeat % (world.pixelReso) !== 0)  {
+    if (world.heartbeat % (stepBypass) !== 0)  {
         return false;
     }
 
