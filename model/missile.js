@@ -11,12 +11,21 @@ var Missile = function(params) {
         g: 0,
         b: 0
     }
+
+    this.on('kill',function(){
+        socket.emit('showMessagesSreeen',{text: 'entity kill : ' + this.class, color:this.color});
+    });
 }
 
 
 Missile.prototype.routine = function() {
-    return false;
+
+    this.move()
+        .collisionTest();
+    return true;
+
 }
+
 
 module.exports = Missile;
 

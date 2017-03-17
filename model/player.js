@@ -170,6 +170,7 @@ Player.prototype.routine = function() {
     }
 
     //Move player
+    //this.move(); //entity
     switch (this.direction) {
         case "right":
             this.x ++;
@@ -258,7 +259,7 @@ Player.prototype.routine = function() {
     //Shooter Class
     if (this.class == 'shooter'){
         if (this.activatePower && this.powerStep === 0) {
-            world.emit('spawn',{type:'missile', x:this.x, y:this.y});
+            world.emit('spawn',{type:'missile', x:this.x, y:this.y, direction: this.direction});
         }
 
     }
