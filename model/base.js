@@ -1,9 +1,13 @@
 
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 var Model_base = function(){
-    this.basedata = 'basetoot';
-//construct
+
+    EventEmitter.call(this);
 }
+
+util.inherits(Model_base, EventEmitter);
 
 Model_base.prototype.getCollection = function(){
     return null;

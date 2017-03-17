@@ -28,6 +28,7 @@ function render() {
 
 
     this.boni = {};
+    this.missiles = {};
 
     var socket;
     $(document).ready(function() {
@@ -178,6 +179,15 @@ function render() {
             that.graphics2.beginFill(getIntColor(color), 1);
             that.graphics2.drawCircle(bonus.x * world.pixelReso, bonus.y * world.pixelReso, world.pixelReso);
         });
+
+
+       //Show missiles
+        _.each(this.missiles, function(missile){
+            that.graphics2.beginFill(getIntColor(missile.color), 1);
+            that.graphics2.drawCircle(missile.x * world.pixelReso, missile.y * world.pixelReso, world.pixelReso);
+        });
+
+
     }
 
     function bindChangeName() {
@@ -262,7 +272,16 @@ function render() {
         socket.on('boniUpdate', function(boniList) {
             that.boni = {};
             _.each(boniList, function(bonus){
-                that.bonusUpdate(bonus);
+                that.boni[bonus.id] = bonus;
+            });
+            refreshLayer();
+        });
+
+       //Update all missiles
+        socket.on('missilesUpdate', function(missilesList) {
+            that.missiles = {};
+            _.each(missilesList, function(missile){
+                that.missiles[missile.id] = missile;
             });
             refreshLayer();
         });
@@ -285,7 +304,6 @@ function render() {
     };
 
     this.bonusUpdate = function(bonus) {
-        this.boni[bonus.id] = bonus;
     };
 
     function darken(color,force) {

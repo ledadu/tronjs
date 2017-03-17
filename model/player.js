@@ -31,9 +31,7 @@ var Player = function(options) {
     this.powerCharge = 0;
     this.step = 0;  //live time
     this.class = null;
-    this.class = "shooter";
-    //this.class = "digger";
-    //this.class = "speeder";
+
     //construct
 }
 
@@ -52,6 +50,9 @@ Player.prototype.spawn = function() {
     var world = this.getCollection().getParent();
 
     this.class = null;
+    this.class = "shooter";
+    //this.class = "digger";
+    //this.class = "speeder";
     this.direction = _.sample(this.directionlist);
     this.x = 1/4 * world.width / world.pixelReso  +  Math.floor((world.width / world.pixelReso * 1/2) * Math.random());
     this.y = 1/4 * world.height / world.pixelReso  +  Math.floor((world.height / world.pixelReso * 1/2) * Math.random());
@@ -250,6 +251,14 @@ Player.prototype.routine = function() {
     if (this.class == 'speeder'){
         if (this.activatePower || this.activatePower2) {
             this.color = lightenColor;
+        }
+
+    }
+
+    //Shooter Class
+    if (this.class == 'shooter'){
+        if (this.activatePower && this.powerStep === 0) {
+            world.emit('spawn',{type:'missile', x:this.x, y:this.y});
         }
 
     }

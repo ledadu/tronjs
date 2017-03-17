@@ -1,11 +1,13 @@
 
-var _       = require('underscore');
-var extend  = require('extend');
+var _        = require('underscore');
+var extend   = require('extend');
 
-var Player  = require('./player');
-var Players = require('../collection/players');
-var Bonus   = require('./bonus');
-var Boni    = require('../collection/boni');
+var Player   = require('./player');
+var Bonus    = require('./bonus');
+var Missile  = require('./missile');
+var Players  = require('../collection/players');
+var Boni     = require('../collection/boni');
+var Missiles = require('../collection/missiles');
 
 var BindSocketPlayerWorld = require('../bind-socket-player-world');
 
@@ -23,11 +25,17 @@ var World = function(httpServer, io, idWorld) {
     this.bmp         = [];
     this.players     = new Players({parent: this});
     this.boni        = new Boni({parent:this});
+    this.missiles    = new Missiles({parent:this});
     this.ioNamespace = io;
     this.httpServer  = httpServer;
     this.gameMode    = "DM";
     this.heartbeat   = 0;
+    
+    this.on('spawn', function(params){
+        if (params.type === 'missile') {this.spawnMissile(params);}
+    });
 };
+
 
 //  export World attributes
 World.prototype.getdata = function() {
@@ -40,7 +48,7 @@ World.prototype.getdata = function() {
         boni: this.boni,
     }
     return data;
-}
+};
 
 // clear world and spawn player
 World.prototype.restartWorld = function() {
@@ -55,9 +63,15 @@ World.prototype.restartWorld = function() {
         this.players.spawnAll(this);
     }
 
-    this.boni = new Boni({parent: this});
+    this.boni     = new Boni({parent: this});
+    this.missiles = new Missiles({parent: this});
 
-}
+};
+
+
+World.prototype.spawnMissile = function(params) {
+   this.missiles.add(new Missile(params));
+};
 
 // routine for this world
 World.prototype.serverRoutine = function() {
@@ -99,12 +113,16 @@ World.prototype.serverRoutine = function() {
             this.ioNamespace.emit('boniUpdate', this.boni.list);
 
         }
+    
+        if (this.heartbeat === 1 || this.missilesRoutine()) {
+            this.ioNamespace.emit('missilesUpdate', this.missiles.list);
+        }
     }
 
     relaunch();
 
     return this;
-}
+};
 
 // routine for all player in this world
 World.prototype.playersRoutine = function() {
@@ -123,7 +141,7 @@ World.prototype.playersRoutine = function() {
 
     return aPlayerHasBeenUpdated;
 
-}
+};
 
 //Routine for all boni in this world
 World.prototype.boniRoutine = function() {
@@ -146,8 +164,24 @@ World.prototype.boniRoutine = function() {
 
     return aBonusHasBeenUpdated;
 
-}
+};
 
+//Routine for all missiles in this world
+World.prototype.missilesRoutine = function() {
+    var that = this,
+        aMissileHasBeenUpdated = false;
+
+    this.missiles.each(function(missile) {
+        if (missile == false) {
+            return;
+        }
+        missile.routine();
+        aMissileHasBeenUpdated = true; 
+    });
+
+    return aMissileHasBeenUpdated;
+
+};
 
 
 // Socket
@@ -179,6 +213,7 @@ World.prototype.initSocket = function() {
                     socket.emit('initWorld', that.getdata());
 
                     socket.emit('boniUpdate', that.boni.list);
+                    socket.emit('missilesUpdate', that.missiles.list);
                     
                     that.players.add(player);
 
@@ -197,7 +232,7 @@ World.prototype.initSocket = function() {
 
 
     return this;
-}
+};
 
 module.exports = World;
 
