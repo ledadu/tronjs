@@ -101,21 +101,22 @@ World.prototype.serverRoutine = function() {
         this.heartbeat++;
 
         //Update clients
-        if (this.playersRoutine()) {
-            //emit just when players are upbated
-            this.ioNamespace.emit('playersUpdate', this.players.list);
-        }
+        var clientsMustBeUpdated = false;
+        
+        clientsMustBeUpdated |= this.playersRoutine();
+        clientsMustBeUpdated |= this.boniRoutine();
+        clientsMustBeUpdated |= this.missilesRoutine();
 
-        if (this.heartbeat === 1 || this.boniRoutine()) {
+        if (this.heartbeat === 1 || clientsMustBeUpdated) {
             //emit just when players are upbated
-            this.ioNamespace.emit('boniUpdate', this.boni.list);
-
-        }
-    
-        if (this.heartbeat === 1 || this.missilesRoutine()) {
-            this.ioNamespace.emit('missilesUpdate', this.missiles.list);
+            this.ioNamespace.emit('entitiesUpdate', {
+                players: this.players.list,
+                boni: this.boni.list,
+                missiles: this.missiles.list,
+            });
             this.missiles.filterRemove(function(missile){return missile.direction === 'dead';});
         }
+
     }
 
     relaunch();
