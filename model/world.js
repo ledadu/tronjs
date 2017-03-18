@@ -193,7 +193,9 @@ World.prototype.initSocket = function() {
             .on('connection', function(socket) {
                 console.log('## socket Io ##  (connection)');
 
-                player = new Player({socket: socket});
+                player = new Player();
+                player.getSocket = function(){return socket;}; //protect frm too mush recursion
+
                 var sid = that.httpServer.getSID(socket.request.headers.cookie);
                 that.httpServer.getSessionFromSID(sid,function(err, session){
                     console.log('Session from ioNamespace @@->', JSON.stringify(session));

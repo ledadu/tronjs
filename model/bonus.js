@@ -3,6 +3,9 @@ var extend = require('extend');
 
 var Bonus = function(params) {
 
+    params = params || {};
+    params.entityType = 'bonus';
+
     var Model_base = require('./entity');
     extend(true, this, new Model_base(params));
 

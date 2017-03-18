@@ -10,7 +10,7 @@ var Entity = function(params) {
 
     this.id    = this.makeid();
     this.directionlist = ["left", "right", "up", "down"];
-
+    this.entityType = params.entityType || null;    
 
     this.name = this.class + '-' + this.id;
 }

@@ -2,48 +2,42 @@ var _ = require('underscore');
 var extend = require('extend');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-//remove options!! must pass by collection parent
-var Player = function(options) {
+var Player = function(params) {
 
-    var Model_base = require('./base');
-    extend(true, this, new Model_base());
+    params = params || {};
+    params.entityType = 'bonus';
+
+    var Model_base = require('./entity');
+    extend(true, this, new Model_base(params));
 
     //construct
      EventEmitter.call(this);
 
     //Put in function to todge 'Too much recurstion'
-    this.getSocket = function(){return options.socket;};
+//remove params socket! must pass by collection parent
 
-    this.directionlist = ["left", "right", "up", "down"];
-    this.id = this.makeid();
-    this.name = this.id;
-    this.x = 50;
-    this.y = 50;
-    this.score = 0;
     this.color = getRandomColor2();
-    this.direction = "right";
+
+    this.score = 0;
     this.commandPool = [];
     this.currentCommand = "";
+
     this.activatePower = false;
     this.powerDuration = 100;
     this.powerMax = 300;
     this.powerStep = 0;
     this.powerCharge = 0;
-    this.step = 0;  //live time
-    this.class = null;
+    this.step = 0;  //live time  -> to entity
 
+    this.on('kill',function(){
+        this.emit('playerUpdate',this);
+    });
     //construct
 }
 
 //Player.prototype = new EventEmitter();
 util.inherits(Player, EventEmitter);
 
-
-Player.prototype.kill = function() {
-    this.direction = "dead";
-    console.log("kill player");
-    this.emit('playerUpdate',this);
-};
 
 Player.prototype.spawn = function() {
 
