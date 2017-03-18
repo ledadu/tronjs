@@ -20,12 +20,10 @@ Entity.prototype.spawn = function() {
     var world = this.getCollection().getParent();
 
     this.class     = this.spawnParams.class || null;
+    this.content   = this.spawnParams.content || null;
     this.direction = this.spawnParams.direction || _.sample(this.directionlist);
     this.x         = this.spawnParams.x || 1/4 * world.width / world.pixelReso  +  Math.floor((world.width / world.pixelReso * 1/2) * Math.random());
     this.y         = this.spawnParams.y || 1/4 * world.height / world.pixelReso  +  Math.floor((world.height / world.pixelReso * 1/2) * Math.random());
-
-    //Put in function to todge 'Too much recurstion'     AIE
-    //this.getSocket = function(){return spawnParams.socket;};
 };
 
 Entity.prototype.move = function() {
@@ -51,9 +49,8 @@ Entity.prototype.move = function() {
 
 Entity.prototype.collisionTest = function() {
 
-    return this;
-    var world  = this.getCollection().getParent(),
-        socket = this.getSocket();
+    //Function to todge 'Too much recurstion'
+    var world  = this.getCollection().getParent();
 
     if (this.direction != "dead"){
 

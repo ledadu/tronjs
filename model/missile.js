@@ -13,7 +13,8 @@ var Missile = function(params) {
     }
 
     this.on('kill',function(){
-        socket.emit('showMessagesSreeen',{text: 'entity kill : ' + this.class, color:this.color});
+        var world = this.getCollection().getParent();
+        world.ioNamespace.emit('showMessagesSreeen',{text: 'entity kill : ' + this.class, color:this.color});
     });
 }
 
@@ -22,7 +23,7 @@ Missile.prototype.routine = function() {
 
     this.move()
         .collisionTest();
-    return true;
+    return true; 
 
 }
 

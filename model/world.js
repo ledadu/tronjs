@@ -76,7 +76,7 @@ World.prototype.spawnMissile = function(params) {
 // routine for this world
 World.prototype.serverRoutine = function() {
     var that             = this,
-        nbPlayersPlaying = _.size(that.players.list),
+        nbPlayersPlaying = that.players.size(),
         playersNotDead   = this.players.getPlayersNotDead(),
         relaunch         = function() {
             setTimeout(function() {
@@ -84,16 +84,14 @@ World.prototype.serverRoutine = function() {
             }, (12 -that.id)); // nb world max + 2
         }
 
-
-
-    if (nbPlayersPlaying >1 && playersNotDead.length == 1 ) {
+    if (nbPlayersPlaying >1 && playersNotDead.size() == 1 ) {
         if (nbPlayersPlaying > 1) {
-            playersNotDead[0].score++;
+            playersNotDead.at(0).score++;
         }
         this.restartWorld();
     }
 
-    if (nbPlayersPlaying == 1 && playersNotDead == 0) {
+    if (nbPlayersPlaying == 1 && playersNotDead.size() == 0) {
 
         this.restartWorld();
     }
@@ -116,6 +114,7 @@ World.prototype.serverRoutine = function() {
     
         if (this.heartbeat === 1 || this.missilesRoutine()) {
             this.ioNamespace.emit('missilesUpdate', this.missiles.list);
+            this.missiles.filterRemove(function(missile){return missile.direction === 'dead';});
         }
     }
 
@@ -158,8 +157,7 @@ World.prototype.boniRoutine = function() {
             return;
         }
 
-        var bonusUpdated = bonus.routine();
-        aBonusHasBeenUpdated = aBonusHasBeenUpdated || bonusUpdated; 
+        aBonusHasBeenUpdated = aBonusHasBeenUpdated || bonus.routine(); 
     });
 
     return aBonusHasBeenUpdated;
@@ -175,9 +173,9 @@ World.prototype.missilesRoutine = function() {
         if (missile == false) {
             return;
         }
-        missile.routine();
-        aMissileHasBeenUpdated = true; 
+        aMissileHasBeenUpdated = aMissileHasBeenUpdated || missile.routine(); 
     });
+
 
     return aMissileHasBeenUpdated;
 

@@ -32,9 +32,26 @@ Collection_base.prototype.get = function(id) {
    return this.list[id]; 
 };
 
-//proxy to undercore filter
+Collection_base.prototype.at = function(index) {
+    return this.list[_.keys(this.list)[index]];
+}
+
+//like to undercore filter
 Collection_base.prototype.filter = function(callBack){
-    return _.filter(this.list, callBack);
+    var _list = {};
+        _collection = new Collection_base();
+    _collection.getParent = this.getParent;
+
+    _.each(this.list, function(model){
+        if (callBack(model)) { _list[model.id] = model;};
+    });
+    _collection.list = _list;
+    return _collection;
+};
+
+//proxy to undercore size
+Collection_base.prototype.size = function(){
+    return _.size(this.list);
 };
 
 //proxy to undercore each
@@ -44,4 +61,14 @@ Collection_base.prototype.each = function(callBack){
 };
 
 
+
+//filter remove by callBack
+Collection_base.prototype.filterRemove = function(callBack){
+     var _list = {};
+    _.each(this.list, function(model){
+        if (!callBack(model)) { _list[model.id] = model;};
+    });
+    this.list = _list;
+    return this;
+};
 module.exports = Collection_base;

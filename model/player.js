@@ -42,7 +42,7 @@ util.inherits(Player, EventEmitter);
 Player.prototype.kill = function() {
     this.direction = "dead";
     console.log("kill player");
-    this.emit('playerMove',this);
+    this.emit('playerUpdate',this);
 };
 
 Player.prototype.spawn = function() {
@@ -107,10 +107,10 @@ Player.prototype.routine = function() {
     
     //get bonus
     var touchedBonus = world.boni.getEntityFromXY(this.x,this.y);
-    if (!_.isNull(touchedBonus)) {
+    if (!_.isUndefined(touchedBonus) && !_.isNull(touchedBonus)) {
         //Apply player class of bonus
         if (touchedBonus.class === 'playerClass') {
-            this.class = touchedBonus.value;
+            this.class = touchedBonus.content;
             socket.emit('showMessagesSreeen',{text: 'Got player class : ' + this.class, color:this.color});
         }
     }

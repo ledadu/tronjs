@@ -8,8 +8,7 @@ function render() {
 
 }
 
-
-(function(){
+var fff = new (function(){
 
     var that = this,
         keyFunctions = {
@@ -30,12 +29,12 @@ function render() {
     this.boni = {};
     this.missiles = {};
 
-    var socket;
+    this.socket;
     $(document).ready(function() {
 
         that.initSocket();
-        initKeyBinding();
-        bindChangeName();
+        that.initKeyBinding();
+        that.bindChangeName();
 
     });
 
@@ -46,6 +45,7 @@ function render() {
 
     }
 
+/*
     function doTouchStart() {
         event.preventDefault();
         canvas = event.target;
@@ -87,11 +87,11 @@ function render() {
             keyFunction = "up";
         }
 
-        socket.emit('touchup', {coord: c, keyFunction: keyFunction});
+        this.socket.emit('touchup', {coord: c, keyFunction: keyFunction});
 
     }
-
-    function initWorld(world) {
+*/
+    this.initWorld = function(world) {
 
         var that = this;
 
@@ -123,17 +123,17 @@ function render() {
         screenMessages.push({text: textMess.text, times: 500, color: textMess.color});
     };
 
-    function initKeyBinding() {
+    this.initKeyBinding = function() {
         $(document).keydown(function(a) {
             keyFunction = '---';
             if (keyFunctions[a.which] != undefined) {
                 keyFunction = keyFunctions[a.which];
             }
-            socket.emit('keydown', {keycode: a.which, keyFunction: keyFunction});
+            that.socket.emit('keydown', {keycode: a.which, keyFunction: keyFunction});
         });
     }
 
-    function refreshLayer() {
+    this.refreshLayer = function() {
 
         var that = this,
             currentPlayer = players[currentPlayerId];
@@ -144,7 +144,7 @@ function render() {
 
         //show player neme
         $.each(players, function(playerName, player) {
-            that.graphics2.addChild(that.game.add.text(player.x * world.pixelReso, player.y * world.pixelReso, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff88"}));
+            that.graphics2.addChild(that.game.add.text(player.x * world.pixelReso, player.y * world.pixelReso, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff"}));
         });
 
 
@@ -190,14 +190,14 @@ function render() {
 
     }
 
-    function bindChangeName() {
+    this.bindChangeName = function() {
         $('.sendValue').bind('submit', function(e) {
             return false;
         });
 
         $('.sendValue').bind('click', function(e) {
             $form = $(e.currentTarget).closest('form');
-            socket.emit("sendValue", $form.serializeArray());
+            this.socket.emit("sendValue", $form.serializeArray());
         });
 
     }
@@ -206,43 +206,43 @@ function render() {
 
         var that = this;
 
-        socket = io.connect('http://'+ location.host + '/world' + worldId ),
+        this.socket = io.connect('http://'+ location.host + '/world' + worldId ),
                 text = $('#text');
         //connected BIND
-        socket.on('connect', function() {
+        this.socket.on('connect', function() {
             console.log("connected");
             text.html('connected');
         });
 
         //Trigger at the connection
-        socket.on('initParam', function(params) {
+        this.socket.on('initParam', function(params) {
             currentPlayerId = params.player_id;
         });
 
         //Message BIND
-        socket.on('message', function(msg) {
+        this.socket.on('message', function(msg) {
             text.html(msg);
         });
 
         //Debug BIND
-        socket.on('debug', function(msg) {
+        this.socket.on('debug', function(msg) {
             console.log(msg);
         });
 
         //Disconect BIND
-        socket.on('disconnect', function() {
+        this.socket.on('disconnect', function() {
             console.log("disconnected");
             text.html('disconnected');
         });
 
         //Reset caneva by server
-        socket.on('initWorld', function(worldObj) {
+        this.socket.on('initWorld', function(worldObj) {
             world = worldObj;
             players = {};
-            initWorld(world);
+            that.initWorld(world);
         });
 
-        socket.on('updateBmpPixel', function(bmpPixel) {
+        this.socket.on('updateBmpPixel', function(bmpPixel) {
 //            world[bmpPixel.x][bmpPixel.y] = bmpPixel.content;
             that.graphics.beginFill(getIntColor(bmpPixel.content.color), bmpPixel.content.color.a);
             that.graphics.drawCircle(bmpPixel.x * world.pixelReso, bmpPixel.y * world.pixelReso,world.pixelReso);
@@ -250,49 +250,49 @@ function render() {
         });
 
         //Update all players
-        socket.on('playersUpdate', function(players) {
+        this.socket.on('playersUpdate', function(players) {
             _.each(players, function(player){
-                playerUpdate(player);
+                that.playerUpdate(player);
             });
-            refreshLayer();
+            that.refreshLayer();
         });
 
         //Update a player
-        socket.on('playerUpdate', function(player) {
-            playerUpdate(player);
-            refreshLayer();
+        this.socket.on('playerUpdate', function(player) {
+            that.playerUpdate(player);
+            that.refreshLayer();
         });
 
         //On opponnet quit
-        socket.on('playerQuit', function(player) {
+        this.socket.on('playerQuit', function(player) {
             delete players[player.id];
         });
 
         //Update all boni
-        socket.on('boniUpdate', function(boniList) {
+        this.socket.on('boniUpdate', function(boniList) {
             that.boni = {};
             _.each(boniList, function(bonus){
                 that.boni[bonus.id] = bonus;
             });
-            refreshLayer();
+            that.refreshLayer();
         });
 
        //Update all missiles
-        socket.on('missilesUpdate', function(missilesList) {
+        this.socket.on('missilesUpdate', function(missilesList) {
             that.missiles = {};
             _.each(missilesList, function(missile){
                 that.missiles[missile.id] = missile;
             });
-            refreshLayer();
+            that.refreshLayer();
         });
 
         //Show message on screen
-        socket.on('showMessagesSreeen', function(textMess) {
+        this.socket.on('showMessagesSreeen', function(textMess) {
             putmessage(textMess);
         });
     };
 
-    function playerUpdate(player) {
+    this.playerUpdate = function(player) {
 
         var playerX = player.x * world.pixelReso,
             playerY = player.y * world.pixelReso;

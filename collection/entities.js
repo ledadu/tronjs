@@ -21,11 +21,11 @@ Entities.prototype.getEntityFromXY = function(x,y){
         return entity.x === x && entity.y === y;
     });
 
-    if (entities.length === 0) {
+    if (entities.size() === 0) {
         return null;
     }
 
-    return entities[0];
+    return entities.at(0);
 }
 
 
