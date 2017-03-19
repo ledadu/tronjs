@@ -142,12 +142,20 @@ var fff = new (function(){
         this.graphics2.removeChildren();
 
 
-        //show player neme
         $.each(this.players, function(playerName, player) {
-            that.graphics2.addChild(that.game.add.text(player.x * world.pixelReso, player.y * world.pixelReso, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff"}));
+            var playerX = player.x * world.pixelReso,
+                playerY = player.y * world.pixelReso;
+
+            //show player neme
+            that.graphics2.addChild(that.game.add.text(playerX, playerY, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff"}));
+
+            //add new positions of players
+            that.graphics.beginFill(getIntColor(player.color), player.color.a);
+            that.graphics.drawCircle(playerX, playerY, world.pixelReso);
+
         });
 
-
+       
         //Show powerState
         if (!_.isUndefined(currentPlayer)) {
             that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
@@ -243,7 +251,6 @@ var fff = new (function(){
         });
 
         this.socket.on('updateBmpPixel', function(bmpPixel) {
-//            world[bmpPixel.x][bmpPixel.y] = bmpPixel.content;
             that.graphics.beginFill(getIntColor(bmpPixel.content.color), bmpPixel.content.color.a);
             that.graphics.drawCircle(bmpPixel.x * world.pixelReso, bmpPixel.y * world.pixelReso,world.pixelReso);
 
@@ -251,26 +258,25 @@ var fff = new (function(){
 
         //Update all players
         this.socket.on('entitiesUpdate', function(entities) {
+
+            //update players
             _.each(entities.players, function(player){
-                that.playerUpdate(player);
+                that.players[player.id] = player;
             });
 
+            //update boni
             that.boni = {};
             _.each(entities.boni, function(bonus){
                 that.boni[bonus.id] = bonus;
             });
 
+            //update missiles
             that.missiles = {};
             _.each(entities.missiles, function(missile){
                 that.missiles[missile.id] = missile;
             });
 
-            that.refreshLayer();
-        });
-
-        //Update a player
-        this.socket.on('playerUpdate', function(player) {
-            that.playerUpdate(player);
+            //refresh graphics layer
             that.refreshLayer();
         });
 
@@ -283,17 +289,6 @@ var fff = new (function(){
         this.socket.on('showMessagesSreeen', function(textMess) {
             putmessage(textMess);
         });
-    };
-
-    this.playerUpdate = function(player) {
-
-        var playerX = player.x * world.pixelReso,
-            playerY = player.y * world.pixelReso;
-
-        this.graphics.beginFill(getIntColor(player.color), player.color.a);
-        this.graphics.drawCircle(playerX, playerY, world.pixelReso);
-
-        this.players[player.id] = player;
     };
 
     this.bonusUpdate = function(bonus) {

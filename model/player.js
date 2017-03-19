@@ -30,7 +30,6 @@ var Player = function(params) {
     this.step = 0;  //live time  -> to entity
 
     this.on('kill',function(){
-        this.emit('playerUpdate',this);
     });
     //construct
 }

@@ -41,7 +41,6 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
                 if (that.world.players.list[that.player.id] != undefined) {
                     that.world.players.list[that.player.id].name = data.value;
                 }
-                that.world.ioNamespace.emit('playerUpdate', that.player);
             }
         });
 
