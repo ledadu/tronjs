@@ -2,7 +2,7 @@
 var extend = require('extend');
 
 
-var Missiles = function(options) {
+var Explosions = function(options) {
 
     var Collection_base = require('./entities');
     extend(true, this, new Collection_base(options));
@@ -14,7 +14,7 @@ var Missiles = function(options) {
 
 
 //Add prototype functions to overwrite extend class
-Missiles.prototype._prototype = function() {
+Explosions.prototype._prototype = function() {
 
     //Init
     this.init = function(options){
@@ -24,4 +24,4 @@ Missiles.prototype._prototype = function() {
 
 }
 
-module.exports = Missiles;
+module.exports = Explosions;

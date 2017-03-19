@@ -25,9 +25,9 @@ Boni.prototype._prototype = function() {
     this.init = function(options){
         //spawn boni
         
-        this.add(new Bonus({class:'playerClass',content:'speeder'}));
-
-        this.add(new Bonus({class:'playerClass',content:'digger'}));
+        this.add(new Bonus({class:'playerClass',content:'shooter'}));
+//        this.add(new Bonus({class:'playerClass',content:'speeder'}));
+//        this.add(new Bonus({class:'playerClass',content:'digger'}));
 
         return this;
     };

@@ -252,7 +252,7 @@ Player.prototype.routine = function() {
     //Shooter Class
     if (this.class == 'shooter'){
         if (this.activatePower && this.powerStep === 0) {
-            world.emit('spawn',{type:'missile', x:this.x, y:this.y, direction: this.direction});
+            world.emit('spawn',{type:'missile', x:this.x, y:this.y, direction: this.direction, playerid: this.id});
         }
 
     }

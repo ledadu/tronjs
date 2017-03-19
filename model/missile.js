@@ -12,9 +12,12 @@ var Missile = function(params) {
         b: 0
     }
 
+    this.playerId = params.playerId;
+
     this.on('kill',function(){
         var world = this.getCollection().getParent();
         world.ioNamespace.emit('showMessagesSreeen',{text: 'entity kill : ' + this.class, color:this.color});
+        world.emit('spawn',{type:'explosion', x:this.x, y:this.y, creatorId: this.id});
     });
 }
 

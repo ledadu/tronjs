@@ -20,15 +20,16 @@ var fff = new (function(){
             65: "activatePower",
             90: "activatePower2"
         },
-        world,
         currentPlayerId = null,
         screenMessages  = [];
 
 
+    this.world    = {},
     this.entities = {
-        players  : {},
-        boni     : {},
-        missiles : {}
+        players    : {},
+        boni       : {},
+        missiles   : {},
+        explosions : {}
     };
 
     this.socket;
@@ -93,7 +94,7 @@ var fff = new (function(){
 
     }
 */
-    this.initWorld = function(world) {
+    this.initWorld = function() {
 
         var that = this;
 
@@ -108,12 +109,17 @@ var fff = new (function(){
         //App.layer2.addEventListener("touchstart", doTouchStart, false);
 
         this.graphics.clear();
-        $.each(world.bmp, function(x, cc) {
+
+        if (_.isUndefined(this.world.bmp)) {
+            return this;
+        }
+
+        $.each(this.world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (x != null && y != null && pixel != null) {
                         that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
-                        that.graphics.drawCircle(x * world.pixelReso, y * world.pixelReso,world.pixelReso);
+                        that.graphics.drawCircle(x * that.world.pixelReso, y * that.world.pixelReso, that.world.pixelReso);
                     }
                 });
             }
@@ -145,15 +151,15 @@ var fff = new (function(){
 
 
         $.each(this.entities.players, function(playerName, player) {
-            var playerX = player.x * world.pixelReso,
-                playerY = player.y * world.pixelReso;
+            var playerX = player.x * that.world.pixelReso,
+                playerY = player.y * that.world.pixelReso;
 
             //show player neme
             that.graphics2.addChild(that.game.add.text(playerX, playerY, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff"}));
 
             //add new positions of players
             that.graphics.beginFill(getIntColor(player.color), player.color.a);
-            that.graphics.drawCircle(playerX, playerY, world.pixelReso);
+            that.graphics.drawCircle(playerX, playerY, that.world.pixelReso);
 
         });
 
@@ -187,14 +193,20 @@ var fff = new (function(){
             };
 
             that.graphics2.beginFill(getIntColor(color), 1);
-            that.graphics2.drawCircle(bonus.x * world.pixelReso, bonus.y * world.pixelReso, world.pixelReso);
+            that.graphics2.drawCircle(bonus.x * that.world.pixelReso, bonus.y * that.world.pixelReso, that.world.pixelReso);
         });
 
 
        //Show missiles
         _.each(this.entities.missiles, function(missile){
             that.graphics2.beginFill(getIntColor(missile.color), 1);
-            that.graphics2.drawCircle(missile.x * world.pixelReso, missile.y * world.pixelReso, world.pixelReso);
+            that.graphics2.drawCircle(missile.x * that.world.pixelReso, missile.y * that.world.pixelReso, that.world.pixelReso);
+        });
+
+        //Show explosions
+        _.each(this.entities.explosions, function(explosion){
+            that.graphics2.beginFill(getIntColor(explosion.color), 1);
+            that.graphics2.drawCircle(explosion.x * that. world.pixelReso, explosion.y *that. world.pixelReso, that.world.pixelReso);
         });
 
 
@@ -247,20 +259,13 @@ var fff = new (function(){
 
         //Reset caneva by server
         this.socket.on('initWorld', function(worldObj) {
-            world = worldObj;
-
-            this.entities = {
-                players  : {},
-                boni     : {},
-                missiles : {}
-            };
-
-            that.initWorld(world);
+            that.world = worldObj;
+            that.initWorld();
         });
 
         this.socket.on('updateBmpPixel', function(bmpPixel) {
             that.graphics.beginFill(getIntColor(bmpPixel.content.color), bmpPixel.content.color.a);
-            that.graphics.drawCircle(bmpPixel.x * world.pixelReso, bmpPixel.y * world.pixelReso,world.pixelReso);
+            that.graphics.drawCircle(bmpPixel.x * that.world.pixelReso, bmpPixel.y * that.world.pixelReso,that.world.pixelReso);
 
         });
 

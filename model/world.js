@@ -1,13 +1,15 @@
 
-var _        = require('underscore');
-var extend   = require('extend');
+var _          = require('underscore');
+var extend     = require('extend');
 
-var Player   = require('./player');
-var Bonus    = require('./bonus');
-var Missile  = require('./missile');
-var Players  = require('../collection/players');
-var Boni     = require('../collection/boni');
-var Missiles = require('../collection/missiles');
+var Player     = require('./player');
+var Bonus      = require('./bonus');
+var Missile    = require('./missile');
+var Explosion  = require('./explosion');
+var Players    = require('../collection/players');
+var Boni       = require('../collection/boni');
+var Missiles   = require('../collection/missiles');
+var Explosions = require('../collection/explosions');
 
 var BindSocketPlayerWorld = require('../bind-socket-player-world');
 
@@ -26,6 +28,7 @@ var World = function(httpServer, io, idWorld) {
     this.players     = new Players({parent: this});
     this.boni        = new Boni({parent:this});
     this.missiles    = new Missiles({parent:this});
+    this.explosions  = new Explosions({parent:this});
     this.ioNamespace = io;
     this.httpServer  = httpServer;
     this.gameMode    = "DM";
@@ -33,6 +36,7 @@ var World = function(httpServer, io, idWorld) {
     
     this.on('spawn', function(params){
         if (params.type === 'missile') {this.spawnMissile(params);}
+        if (params.type === 'explosion') {this.spawnExplosion(params);}
     });
 };
 
@@ -44,8 +48,6 @@ World.prototype.getdata = function() {
         height: this.height,
         bmp: this.bmp,
         pixelReso: this.pixelReso,
-        players: this.players,
-        boni: this.boni,
     }
     return data;
 };
@@ -63,14 +65,20 @@ World.prototype.restartWorld = function() {
         this.players.spawnAll(this);
     }
 
-    this.boni     = new Boni({parent: this});
-    this.missiles = new Missiles({parent: this});
+    this.boni       = new Boni({parent: this});
+    this.missiles   = new Missiles({parent: this});
+    this.explosions = new Missiles({parent: this});
 
 };
 
-
+//Spawn missile
 World.prototype.spawnMissile = function(params) {
-   this.missiles.add(new Missile(params));
+    this.missiles.add(new Missile(params));
+};
+
+//Spawn explosion
+World.prototype.spawnExplosion = function(params) {
+    this.explosions.add(new Explosion(params));
 };
 
 // routine for this world
@@ -110,9 +118,10 @@ World.prototype.serverRoutine = function() {
         if (this.heartbeat === 1 || clientsMustBeUpdated) {
             //emit just when players are upbated
             this.ioNamespace.emit('entitiesUpdate', {
-                players: this.players.list,
-                boni: this.boni.list,
-                missiles: this.missiles.list,
+                players    : this.players.list,
+                boni       : this.boni.list,
+                missiles   : this.missiles.list,
+                explosions : this.explosions.list,
             });
             this.missiles.filterRemove(function(missile){return missile.direction === 'dead';});
         }
@@ -213,9 +222,6 @@ World.prototype.initSocket = function() {
 
                     socket.emit('initWorld', that.getdata());
 
-                    socket.emit('boniUpdate', that.boni.list);
-                    socket.emit('missilesUpdate', that.missiles.list);
-                    
                     that.players.add(player);
 
                     var bindSocketPlayerWorld = new BindSocketPlayerWorld(socket, that, player);
