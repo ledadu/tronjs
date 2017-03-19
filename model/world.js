@@ -114,6 +114,7 @@ World.prototype.serverRoutine = function() {
         clientsMustBeUpdated |= this.playersRoutine();
         clientsMustBeUpdated |= this.boniRoutine();
         clientsMustBeUpdated |= this.missilesRoutine();
+        clientsMustBeUpdated |= this.explosionsRoutine();
 
         if (this.heartbeat === 1 || clientsMustBeUpdated) {
             //emit just when players are upbated
@@ -191,6 +192,24 @@ World.prototype.missilesRoutine = function() {
 
 };
 
+//TODO RAFACTOR routinnnnnnnnnnne
+
+//Routine for all explosion in this world
+World.prototype.explosionsRoutine = function() {
+    var that = this,
+        aMissileHasBeenUpdated = false;
+
+    this.explosions.each(function(missile) {
+        if (missile == false) {
+            return;
+        }
+        aMissileHasBeenUpdated = aMissileHasBeenUpdated || missile.routine(); 
+    });
+
+
+    return aMissileHasBeenUpdated;
+
+};
 
 // Socket
 World.prototype.initSocket = function() {

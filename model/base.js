@@ -1,4 +1,5 @@
 
+var _ = require('underscore');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 
@@ -10,6 +11,16 @@ var Model_base = function(){
 util.inherits(Model_base, EventEmitter);
 
 Model_base.prototype.getCollection = function(){
+    return null;
+}
+
+Model_base.prototype.destroy = function(){
+    var collection = this.getCollection();
+
+    if (!_.isNull()) {
+        collection.remove(this);
+    }
+
     return null;
 }
 
