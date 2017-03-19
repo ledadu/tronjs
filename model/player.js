@@ -27,7 +27,6 @@ var Player = function(params) {
     this.powerMax = 300;
     this.powerStep = 0;
     this.powerCharge = 0;
-    this.step = 0;  //live time  -> to entity
 
     this.on('kill',function(){
     });
@@ -37,7 +36,8 @@ var Player = function(params) {
 //Player.prototype = new EventEmitter();
 util.inherits(Player, EventEmitter);
 
-
+//overrided
+/*
 Player.prototype.spawn = function() {
 
     var world = this.getCollection().getParent();
@@ -51,6 +51,7 @@ Player.prototype.spawn = function() {
     this.y = 1/4 * world.height / world.pixelReso  +  Math.floor((world.height / world.pixelReso * 1/2) * Math.random());
     this.step = 0;
 };
+*/
 
 
 /**

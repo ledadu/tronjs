@@ -11,6 +11,7 @@ var Entity = function(params) {
     this.id    = this.makeid();
     this.directionlist = ["left", "right", "up", "down"];
     this.entityType = params.entityType || null;    
+    this.step;
 
     this.name = this.class + '-' + this.id;
 }
@@ -19,6 +20,7 @@ Entity.prototype.spawn = function() {
 
     var world = this.getCollection().getParent();
 
+    this.step      = 0;
     this.class     = this.spawnParams.class || null;
     this.content   = this.spawnParams.content || null;
     this.direction = this.spawnParams.direction || _.sample(this.directionlist);
@@ -53,9 +55,6 @@ Entity.prototype.collisionTest = function() {
     var world  = this.getCollection().getParent();
 
     if (this.direction != "dead"){
-
-        //Inc player step
-        this.step++;
 
         //Manage player death colision
         if (

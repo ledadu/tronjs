@@ -18,19 +18,27 @@ var Explosion = function(params) {
 
 
 Explosion.prototype.routine = function() {
-    var world  = this.getCollection().getParent();
+    
+    this.step++;
 
-        for (var x = this.x-3; x < this.x+3; x++) {
-            for (var y = this.y-3; y < this.y+3; y++) {
-                if (!_.isUndefined(world.bmp[x]) && !_.isUndefined(world.bmp[x])[y]) {
-                    delete world.bmp[x][y];
-                }
-            }
-        }
+    var world  = this.getCollection().getParent(),
+        radius = Math.round((this.step/world.pixelReso));
 
     
+
+    for (var x = this.x-radius; x < this.x+radius; x++) {
+        for (var y = this.y-radius; y < this.y+radius; y++) {
+            if (!_.isUndefined(world.bmp[x]) && !_.isUndefined(world.bmp[x])[y]) {
+                delete world.bmp[x][y];
+            }
+        }
+    }
+    
     world.ioNamespace.emit('initWorld', world.getdata());
-    this.destroy();
+
+    if (radius >=3) {
+        this.destroy();
+    }
     return true; 
 
 }
