@@ -25,9 +25,11 @@ var fff = new (function(){
         screenMessages  = [];
 
 
-    this.players  = {},
-    this.boni     = {};
-    this.missiles = {};
+    this.entities = {
+        players  : {},
+        boni     : {},
+        missiles : {}
+    };
 
     this.socket;
     $(document).ready(function() {
@@ -136,13 +138,13 @@ var fff = new (function(){
     this.refreshLayer = function() {
 
         var that = this,
-            currentPlayer = this.players[currentPlayerId];
+            currentPlayer = this.entities.players[currentPlayerId];
 
         this.graphics2.clear();
         this.graphics2.removeChildren();
 
 
-        $.each(this.players, function(playerName, player) {
+        $.each(this.entities.players, function(playerName, player) {
             var playerX = player.x * world.pixelReso,
                 playerY = player.y * world.pixelReso;
 
@@ -177,7 +179,7 @@ var fff = new (function(){
         });
 
         //Show bonus
-        _.each(this.boni, function(bonus){
+        _.each(this.entities.boni, function(bonus){
             var color = {
                 r: 64 + Math.round(Math.random()*128),
                 g: 64 + Math.round(Math.random()*128),
@@ -190,7 +192,7 @@ var fff = new (function(){
 
 
        //Show missiles
-        _.each(this.missiles, function(missile){
+        _.each(this.entities.missiles, function(missile){
             that.graphics2.beginFill(getIntColor(missile.color), 1);
             that.graphics2.drawCircle(missile.x * world.pixelReso, missile.y * world.pixelReso, world.pixelReso);
         });
@@ -246,7 +248,13 @@ var fff = new (function(){
         //Reset caneva by server
         this.socket.on('initWorld', function(worldObj) {
             world = worldObj;
-            this.players = {};
+
+            this.entities = {
+                players  : {},
+                boni     : {},
+                missiles : {}
+            };
+
             that.initWorld(world);
         });
 
@@ -258,40 +266,20 @@ var fff = new (function(){
 
         //Update all players
         this.socket.on('entitiesUpdate', function(entities) {
-
-            //update players
-            _.each(entities.players, function(player){
-                that.players[player.id] = player;
-            });
-
-            //update boni
-            that.boni = {};
-            _.each(entities.boni, function(bonus){
-                that.boni[bonus.id] = bonus;
-            });
-
-            //update missiles
-            that.missiles = {};
-            _.each(entities.missiles, function(missile){
-                that.missiles[missile.id] = missile;
-            });
-
+            that.entities = entities;
             //refresh graphics layer
             that.refreshLayer();
         });
 
         //On opponnet quit
         this.socket.on('playerQuit', function(player) {
-            delete this.players[player.id];
+            delete that.entities.players[player.id];
         });
 
         //Show message on screen
         this.socket.on('showMessagesSreeen', function(textMess) {
             putmessage(textMess);
         });
-    };
-
-    this.bonusUpdate = function(bonus) {
     };
 
     function darken(color,force) {
