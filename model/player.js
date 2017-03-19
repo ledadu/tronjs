@@ -60,7 +60,8 @@ Player.prototype.spawn = function() {
  */
 Player.prototype.routine = function() {
 
-    var world  = this.getCollection().getParent(),
+    var that   = this,
+        world  = this.getCollection().getParent(),
         socket = this.getSocket()
         stepBypass = world.pixelReso;
 
@@ -99,13 +100,15 @@ Player.prototype.routine = function() {
     //------- Start player move ---------
     
     //get bonus
-    var touchedBonus = world.boni.getEntityFromXY(this.x,this.y);
-    if (!_.isUndefined(touchedBonus) && !_.isNull(touchedBonus)) {
+    var touchedBoni = world.boni.getEntitiesFromXY(this.x,this.y);
+    if (touchedBoni.size() > 0) {
         //Apply player class of bonus
-        if (touchedBonus.class === 'playerClass') {
-            this.class = touchedBonus.content;
-            socket.emit('showMessagesSreeen',{text: 'Got player class : ' + this.class, color:this.color});
-        }
+        touchedBoni.each(function(touchedBonus){
+            if (touchedBonus.class === 'playerClass') {
+                that.class = touchedBonus.content;
+                socket.emit('showMessagesSreeen',{text: 'Got player class : ' + that.class, color:that.color});
+            }
+        });
     }
 
     //Pop command of this

@@ -39,7 +39,7 @@ Collection_base.prototype.at = function(index) {
 //like to undercore filter
 Collection_base.prototype.filter = function(callBack){
     var _list = {};
-        _collection = new Collection_base();
+        _collection = _.clone(this);
     _collection.getParent = this.getParent;
 
     _.each(this.list, function(model){

@@ -16,16 +16,10 @@ Entities.prototype.spawnAll = function () {
     });
 };
 
-Entities.prototype.getEntityFromXY = function(x,y){
-    entities = this.filter(function(entity){  //TODO USE WHERE!!!
+Entities.prototype.getEntitiesFromXY = function(x,y){
+    return this.filter(function(entity){
         return entity.x === x && entity.y === y;
     });
-
-    if (entities.size() === 0) {
-        return null;
-    }
-
-    return entities.at(0);
 }
 
 
