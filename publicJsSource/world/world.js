@@ -108,12 +108,17 @@ var fff = new (function(){
 
         //App.layer2.addEventListener("touchstart", doTouchStart, false);
 
+        this.drawnBmp();
+
+    };
+
+    this.drawnBmp = function() {
+
         this.graphics.clear();
 
         if (_.isUndefined(this.world.bmp)) {
             return this;
         }
-
         $.each(this.world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
@@ -125,7 +130,7 @@ var fff = new (function(){
             }
         }); 
 
-    }
+    };
 
     function putmessage(textMess) {
         screenMessages.push({text: textMess.text, times: 500, color: textMess.color});
@@ -158,6 +163,9 @@ var fff = new (function(){
             that.graphics2.addChild(that.game.add.text(playerX, playerY, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff"}));
 
             //add new positions of players
+
+            if(_.isUndefined(that.world.bmp[player.x]) || _.isNull(that.world.bmp[player.x])) {that.world.bmp[player.x] = [];}
+            that.world.bmp[player.x][player.y] = player;
             that.graphics.beginFill(getIntColor(player.color), player.color.a);
             that.graphics.drawCircle(playerX, playerY, that.world.pixelReso);
 
@@ -263,15 +271,23 @@ var fff = new (function(){
             that.initWorld();
         });
 
-        this.socket.on('updateBmpPixel', function(bmpPixel) {
-            that.graphics.beginFill(getIntColor(bmpPixel.content.color), bmpPixel.content.color.a);
-            that.graphics.drawCircle(bmpPixel.x * that.world.pixelReso, bmpPixel.y * that.world.pixelReso,that.world.pixelReso);
+        this.socket.on('updateBmpPixels', function(pixels) {
+            _.each(pixels, function(pixel){
+                if (_.isNull(pixel.content)) {
+                    if(!_.isUndefined(that.world.bmp[pixel.x])) delete that.world.bmp[pixel.x][pixel.y];
+                    return;
+                };
+                if(_.isUndefined(that.world.bmp[pixel.x])) {that.world.bmp[pixel.x] = [];}
+                that.world.bmp[pixel.x][pixel.y] = pixel.content;
+            });
+            that.drawnBmp();
 
         });
 
         //Update all players
         this.socket.on('entitiesUpdate', function(entities) {
             that.entities = entities;
+
             //refresh graphics layer
             that.refreshLayer();
         });

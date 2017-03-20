@@ -231,7 +231,7 @@ Player.prototype.routine = function() {
 
             if(this.powerStep === 0) {
                 world.bmp[previous.x][previous.y] = {playerid :this.id ,color:_.clone(darkenColor)};
-                world.ioNamespace.emit('updateBmpPixel', {x: previous.x, y: previous.y, content: world.bmp[previous.x][previous.y]});
+                world.ioNamespace.emit('updateBmpPixels', [{x: previous.x, y: previous.y, content: world.bmp[previous.x][previous.y]}]);
             } 
             this.color.a = 0.15;
             this.color.solid = false;

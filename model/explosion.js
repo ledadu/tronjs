@@ -21,20 +21,20 @@ Explosion.prototype.routine = function() {
     
     this.step++;
 
-    var world  = this.getCollection().getParent(),
-        radius = Math.round((this.step/world.pixelReso));
-
-    
+    var world       = this.getCollection().getParent(),
+        radius      = Math.round((this.step/world.pixelReso)),
+        bmpToDelete = [];
 
     for (var x = this.x-radius; x < this.x+radius; x++) {
         for (var y = this.y-radius; y < this.y+radius; y++) {
             if (!_.isUndefined(world.bmp[x]) && !_.isUndefined(world.bmp[x])[y]) {
                 delete world.bmp[x][y];
+                bmpToDelete.push({x:x,y:y,content:null});
             }
         }
     }
     
-    world.ioNamespace.emit('initWorld', world.getdata());
+    world.ioNamespace.emit('updateBmpPixels', bmpToDelete);
 
     if (radius >=3) {
         this.destroy();
