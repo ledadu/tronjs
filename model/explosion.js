@@ -9,7 +9,8 @@ var Explosion = function(params) {
     this.color = {
         r: 255,
         g: 255,
-        b: 0
+        b: 0,
+        a: 0.1
     }
 
     this.creatorId = params.creatorId;

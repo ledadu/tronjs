@@ -213,8 +213,8 @@ var fff = new (function(){
 
         //Show explosions
         _.each(this.entities.explosions, function(explosion){
-            that.graphics2.beginFill(getIntColor(explosion.color), 1);
-            that.graphics2.drawCircle(explosion.x * that. world.pixelReso, explosion.y *that. world.pixelReso, that.world.pixelReso);
+            that.graphics2.beginFill(getIntColor(explosion.color), explosion.color.a);
+            that.graphics2.drawCircle(explosion.x * that. world.pixelReso, explosion.y *that. world.pixelReso, that.world.pixelReso * explosion.step/2);
         });
 
 
