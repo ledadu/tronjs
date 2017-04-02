@@ -5,14 +5,15 @@ var extend     = require('extend');
 var Player     = require('./player');
 var Bonus      = require('./bonus');
 var Missile    = require('./missile');
+var Laser      = require('./laser');
 var Explosion  = require('./explosion');
 var Players    = require('../collection/players');
 var Boni       = require('../collection/boni');
 var Missiles   = require('../collection/missiles');
+var Lasers     = require('../collection/lasers');
 var Explosions = require('../collection/explosions');
 
 var BindSocketPlayerWorld = require('../bind-socket-player-world');
-
 
 var World = function(httpServer, io, idWorld) {
 
@@ -28,6 +29,7 @@ var World = function(httpServer, io, idWorld) {
     this.players     = new Players({parent: this});
     this.boni        = new Boni({parent:this});
     this.missiles    = new Missiles({parent:this});
+    this.lasers      = new Lasers({parent:this});
     this.explosions  = new Explosions({parent:this});
     this.ioNamespace = io;
     this.httpServer  = httpServer;
@@ -36,6 +38,7 @@ var World = function(httpServer, io, idWorld) {
     
     this.on('spawn', function(params){
         if (params.type === 'missile') {this.spawnMissile(params);}
+        if (params.type === 'laser') {this.spawnLaser(params);}
         if (params.type === 'explosion') {this.spawnExplosion(params);}
     });
 };
@@ -81,6 +84,12 @@ World.prototype.spawnExplosion = function(params) {
     this.explosions.add(new Explosion(params));
 };
 
+//Spawn laser
+World.prototype.spawnLaser = function(params) {
+    this.lasers.add(new Laser(params));
+};
+
+
 // routine for this world
 World.prototype.serverRoutine = function() {
     var that             = this,
@@ -115,6 +124,7 @@ World.prototype.serverRoutine = function() {
         clientsMustBeUpdated |= this.boniRoutine();
         clientsMustBeUpdated |= this.missilesRoutine();
         clientsMustBeUpdated |= this.explosionsRoutine();
+        clientsMustBeUpdated |= this.lasersRoutine();
 
         if (this.heartbeat === 1 || clientsMustBeUpdated) {
             //emit just when players are upbated
@@ -122,6 +132,7 @@ World.prototype.serverRoutine = function() {
                 players    : this.players.list,
                 boni       : this.boni.list,
                 missiles   : this.missiles.list,
+                lasers     : this.lasers.list,
                 explosions : this.explosions.list,
             });
             this.missiles.filterRemove(function(missile){return missile.direction === 'dead';});
@@ -185,6 +196,24 @@ World.prototype.missilesRoutine = function() {
             return;
         }
         aMissileHasBeenUpdated = aMissileHasBeenUpdated || missile.routine(); 
+    });
+
+
+    return aMissileHasBeenUpdated;
+
+};
+
+
+//Routine for all lasers in this world
+World.prototype.lasersRoutine = function() {
+    var that = this,
+        aMissileHasBeenUpdated = false;
+
+    this.lasers.each(function(laser) {
+        if (laser == false) {
+            return;
+        }
+        aMissileHasBeenUpdated = aMissileHasBeenUpdated || laser.routine(); 
     });
 
 

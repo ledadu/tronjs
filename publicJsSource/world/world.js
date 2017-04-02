@@ -29,7 +29,8 @@ var fff = new (function(){
         players    : {},
         boni       : {},
         missiles   : {},
-        explosions : {}
+        explosions : {},
+        lasers     : {}
     };
 
     this.socket;
@@ -214,9 +215,38 @@ var fff = new (function(){
         //Show explosions
         _.each(this.entities.explosions, function(explosion){
             that.graphics2.beginFill(getIntColor(explosion.color), explosion.color.a);
-            that.graphics2.drawCircle(explosion.x * that. world.pixelReso, explosion.y *that. world.pixelReso, that.world.pixelReso * explosion.step/2);
+            that.graphics2.drawCircle(explosion.x * that.world.pixelReso, explosion.y * that.world.pixelReso, that.world.pixelReso * explosion.step/2);
         });
 
+        //Show lasers
+        _.each(this.entities.lasers, function(laser){
+            that.graphics2.beginFill(getIntColor(laser.color), laser.color.a);
+            var y = laser.y,
+                x = laser.x;
+
+            while
+                ( x < that.world.width &&
+                  x > 0 &&
+                  y < that.world.height &&
+                  y > 0
+                ) {
+                switch (laser.direction) {
+                    case "right":
+                        x++;
+                        break;
+                    case "left":
+                        x--;
+                        break;
+                    case "up":
+                        y--;
+                        break;
+                    case "down":
+                        y++;
+                        break;
+                }
+                that.graphics2.drawCircle(x * that.world.pixelReso, y * that.world.pixelReso, that.world.pixelReso * laser.step/4);
+           } 
+        });
 
     }
 

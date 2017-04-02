@@ -28,10 +28,31 @@ Explosion.prototype.routine = function() {
 
     for (var x = this.x-radius; x < this.x+radius; x++) {
         for (var y = this.y-radius; y < this.y+radius; y++) {
+
+            //Clean world
             if (!_.isUndefined(world.bmp[x]) && !_.isUndefined(world.bmp[x])[y]) {
                 delete world.bmp[x][y];
+                //put null to delete
                 bmpToDelete.push({x:x,y:y,content:null});
             }
+
+            //get boni
+            touchedEntities = world.boni.getEntitiesFromXY(x,y);
+            if (touchedEntities.size() > 0) {
+                touchedEntities.each(function(touchedEntity){
+                    world.emit('spawn',{type:'explosion', x:x, y:y, creatorId: that.id});
+                    touchedEntity.destroy(); 
+                });
+            }
+
+            //get players
+            touchedEntities = world.players.getEntitiesFromXY(x,y);
+            if (touchedEntities.size() > 0) {
+                touchedEntities.each(function(touchedEntity){
+                    touchedEntity.kill(); 
+                });
+            }
+
         }
     }
     

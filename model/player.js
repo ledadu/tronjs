@@ -198,6 +198,8 @@ Player.prototype.routine = function() {
             this.y < 0 || this.y * world.pixelReso > world.height ||
             world.bmp[this.x][this.y] != null && world.bmp[this.x][this.y].color.solid
         ) {
+
+            //TODO use function isCollidable & isInvinsible ..??
             if (this.class == 'digger'){
                 if (!this.activatePower && !this.activatePower2) {
                     this.kill();
@@ -257,6 +259,10 @@ Player.prototype.routine = function() {
     if (this.class == 'shooter'){
         if (this.activatePower && this.powerStep === 0) {
             world.emit('spawn',{type:'missile', x:this.x, y:this.y, direction: this.direction, playerid: this.id});
+        }
+
+        if (this.activatePower2 && this.powerStep === 0) {
+            world.emit('spawn',{type:'laser', x:this.x, y:this.y, direction: this.direction, playerid: this.id});
         }
 
     }
