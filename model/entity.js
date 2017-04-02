@@ -49,21 +49,81 @@ Entity.prototype.move = function() {
     return this;
 }
 
-Entity.prototype.collisionTest = function() {
+Entity.prototype.collisionTest = function(x,y) {
 
     //Function to todge 'Too much recurstion'
-    var world  = this.getCollection().getParent();
+    var that   = this,
+        world  = this.getCollection().getParent();
 
     if (this.direction != "dead"){
 
         //Manage player death colision
         if (
-            this.x < 0 || this.x * world.pixelReso > world.width ||
-            this.y < 0 || this.y * world.pixelReso > world.height ||
-            !_.isUndefined(world.bmp[this.x]) && world.bmp[this.x][this.y] != null && world.bmp[this.x][this.y].color.solid
+            x < 0 || this.x * world.pixelReso > world.width ||
+            y < 0 || this.y * world.pixelReso > world.height ||
+            !_.isUndefined(world.bmp[x]) && world.bmp[x][y] != null && world.bmp[x][y].color.solid
         ) {
-            this.kill();
+
+            if (this.class == 'digger'){
+                if (!this.activatePower && !this.activatePower2) {
+                    this.kill(); 
+                }
+            }else{
+                this.kill();
+            }
         }
+
+        //get ohter missiles
+        touchedEntities = world.missiles.getEntitiesFromXY(x,y);
+        if (touchedEntities.size() > 0) {
+            touchedEntities.each(function(touchedEntity){
+                if (touchedEntity.id !== that.id) {
+                    touchedEntity.kill(); 
+                    that.kill();
+                }
+            });
+        }
+
+        //get boni
+        touchedEntities = world.boni.getEntitiesFromXY(x,y);
+        if (touchedEntities.size() > 0) {
+            touchedEntities.each(function(touchedEntity){
+               if (that.entityType === 'player') { 
+                    var socket = that.getSocket();
+                    if (touchedEntity.class === 'playerClass') {
+                        that.class = touchedEntity.content;
+                        socket.emit('showMessagesSreeen',{text: 'Got player class : ' + that.class, color:that.color});
+                    }
+                }else{
+                    world.emit('spawn',{type:'explosion', x:x, y:y, creatorId: that.id}); //move to kill !!
+                }
+                touchedEntity.destroy(); 
+            });
+        }
+
+        //get players
+        touchedEntities = world.players.getEntitiesFromXY(x,y);
+        if (touchedEntities.size() > 0) {
+            touchedEntities.each(function(touchedEntity){
+
+                //TODO use function isCollidable & isInvinsible ..??
+                if (touchedEntity.id === that.id) {
+                    return;
+                }
+
+                if (touchedEntity.class == 'digger'){
+                    if (!touchedEntity.activatePower && !touchedEntity.activatePower2) {
+                        world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color}); //move to kill
+                        touchedEntity.kill(); 
+                    }
+                }else{
+                    touchedEntity.kill(); 
+                }
+
+            });
+    }
+
+
     }
 
     return this;

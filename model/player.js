@@ -5,7 +5,7 @@ var EventEmitter = require('events').EventEmitter;
 var Player = function(params) {
 
     params = params || {};
-    params.entityType = 'bonus';
+    params.entityType = 'player';
 
     var Model_base = require('./entity');
     extend(true, this, new Model_base(params));
@@ -100,18 +100,6 @@ Player.prototype.routine = function() {
 
     //------- Start player move ---------
     
-    //get bonus
-    var touchedBoni = world.boni.getEntitiesFromXY(this.x,this.y);
-    if (touchedBoni.size() > 0) {
-        //Apply player class of bonus
-        touchedBoni.each(function(touchedBonus){
-            if (touchedBonus.class === 'playerClass') {
-                that.class = touchedBonus.content;
-                socket.emit('showMessagesSreeen',{text: 'Got player class : ' + that.class, color:that.color});
-            }
-        });
-    }
-
     //Pop command of this
     this.currentCommand = this.commandPool.shift();
 
@@ -192,25 +180,8 @@ Player.prototype.routine = function() {
         //Inc player step
         this.step++;
 
-        //Manage player death colision
-        if (
-            this.x < 0 || this.x * world.pixelReso > world.width ||
-            this.y < 0 || this.y * world.pixelReso > world.height ||
-            world.bmp[this.x][this.y] != null && world.bmp[this.x][this.y].color.solid
-        ) {
+        this.collisionTest(this.x, this.y);
 
-            //TODO use function isCollidable & isInvinsible ..??
-            if (this.class == 'digger'){
-                if (!this.activatePower && !this.activatePower2) {
-                    this.kill();
-                    world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
-                }
-            } else {
-                this.kill();
-                world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color});
-            }
-
-        }
     }
 
     //Manage Bitmap change
@@ -234,9 +205,11 @@ Player.prototype.routine = function() {
             if(this.powerStep === 0) {
                 world.bmp[previous.x][previous.y] = {playerid :this.id ,color:_.clone(darkenColor)};
                 world.ioNamespace.emit('updateBmpPixels', [{x: previous.x, y: previous.y, content: world.bmp[previous.x][previous.y]}]);
-            } 
-            this.color.a = 0.15;
-            this.color.solid = false;
+            }
+            if (_.isUndefined(world.bmp[this.x]) || _.isUndefined(world.bmp[this.x][this.y])) {
+                this.color.a = 0.15;
+                this.color.solid = false;
+            }
         }else if(this.activatePower2){
                 this.color = lightenColor;
         }else {

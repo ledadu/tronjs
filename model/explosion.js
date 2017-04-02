@@ -3,6 +3,9 @@ var extend = require('extend');
 
 var Explosion = function(params) {
 
+    params = params || {};
+    params.entityType = 'explosion';
+
     var Model_base = require('./entity');
     extend(true, this, new Model_base(params));
 
@@ -36,22 +39,7 @@ Explosion.prototype.routine = function() {
                 bmpToDelete.push({x:x,y:y,content:null});
             }
 
-            //get boni
-            touchedEntities = world.boni.getEntitiesFromXY(x,y);
-            if (touchedEntities.size() > 0) {
-                touchedEntities.each(function(touchedEntity){
-                    world.emit('spawn',{type:'explosion', x:x, y:y, creatorId: that.id});
-                    touchedEntity.destroy(); 
-                });
-            }
-
-            //get players
-            touchedEntities = world.players.getEntitiesFromXY(x,y);
-            if (touchedEntities.size() > 0) {
-                touchedEntities.each(function(touchedEntity){
-                    touchedEntity.kill(); 
-                });
-            }
+            this.collisionTest(x,y);
 
         }
     }
