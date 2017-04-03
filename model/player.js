@@ -99,7 +99,7 @@ Player.prototype.routine = function() {
     }
 
     //------- Start player move ---------
-    
+
     //Pop command of this
     this.currentCommand = this.commandPool.shift();
 
@@ -180,6 +180,14 @@ Player.prototype.routine = function() {
         //Inc player step
         this.step++;
 
+        this.isCollidable   = true;
+        this.isDestructible = true;
+
+        if (this.class === 'digger' && (this.activatePower || this.activatePower2)) {
+            this.isCollidable   = false;
+            this.isDestructible = false;
+        }
+
         this.collisionTest(this.x, this.y);
 
     }
@@ -215,7 +223,7 @@ Player.prototype.routine = function() {
         }else {
             if(this.powerStep === 0) {
                 this.color = darkenColor;
-            } 
+            }
 
         }
     }

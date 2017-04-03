@@ -4,7 +4,8 @@ var extend = require('extend');
 var Bonus = function(params) {
 
     params = params || {};
-    params.entityType = 'bonus';
+    params.entityType   = 'bonus';
+    params.isCollidable = false;
 
     var Model_base = require('./entity');
     extend(true, this, new Model_base(params));

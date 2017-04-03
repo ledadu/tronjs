@@ -8,10 +8,12 @@ var Entity = function(params) {
     var Model_base = require('./base');
     extend(true, this, new Model_base());
 
-    this.id    = this.makeid();
-    this.directionlist = ["left", "right", "up", "down"];
-    this.entityType = params.entityType || null;    
-    this.step;
+    this.id             = this.makeid();
+    this.directionlist  = ["left", "right", "up", "down"];
+    this.entityType     = params.entityType   || null;
+    this.isCollidable   = !_.isUndefined(params.isCollidable)   ? params.isCollidable   : true;
+    this.isDestructible = !_.isUndefined(params.isDestructible) ? params.isDestructible : true;
+    this.step           = 0;
 
     this.name = this.class + '-' + this.id;
 }
@@ -63,12 +65,7 @@ Entity.prototype.collisionTest = function(x,y) {
             y < 0 || this.y * world.pixelReso > world.height ||
             !_.isUndefined(world.bmp[x]) && world.bmp[x][y] != null && world.bmp[x][y].color.solid
         ) {
-
-            if (this.class == 'digger'){
-                if (!this.activatePower && !this.activatePower2) {
-                    this.kill(); 
-                }
-            }else{
+            if (this.isDestructible) {
                 this.kill();
             }
         }
@@ -78,7 +75,7 @@ Entity.prototype.collisionTest = function(x,y) {
         if (touchedEntities.size() > 0) {
             touchedEntities.each(function(touchedEntity){
                 if (touchedEntity.id !== that.id) {
-                    touchedEntity.kill(); 
+                    touchedEntity.kill();
                     that.kill();
                 }
             });
@@ -88,7 +85,7 @@ Entity.prototype.collisionTest = function(x,y) {
         touchedEntities = world.boni.getEntitiesFromXY(x,y);
         if (touchedEntities.size() > 0) {
             touchedEntities.each(function(touchedEntity){
-               if (that.entityType === 'player') { 
+               if (that.entityType === 'player') {
                     var socket = that.getSocket();
                     if (touchedEntity.class === 'playerClass') {
                         that.class = touchedEntity.content;
@@ -97,7 +94,7 @@ Entity.prototype.collisionTest = function(x,y) {
                 }else{
                     world.emit('spawn',{type:'explosion', x:x, y:y, creatorId: that.id}); //move to kill !!
                 }
-                touchedEntity.destroy(); 
+                touchedEntity.destroy();
             });
         }
 
@@ -111,14 +108,11 @@ Entity.prototype.collisionTest = function(x,y) {
                     return;
                 }
 
-                if (touchedEntity.class == 'digger'){
-                    if (!touchedEntity.activatePower && !touchedEntity.activatePower2) {
-                        world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color}); //move to kill
-                        touchedEntity.kill(); 
-                    }
-                }else{
-                    touchedEntity.kill(); 
+                if (touchedEntity.isDestructible) {
+                    world.ioNamespace.emit('showMessagesSreeen', {text: this.id + ' ☹', color: this.color}); //move to kill
+                    touchedEntity.kill();
                 }
+
 
             });
     }
