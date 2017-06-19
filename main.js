@@ -25,7 +25,7 @@ var lobby = new Lobby( httpServer.io.of('/lobby') , worlds );
 httpServer.configure({worlds:lobby.worlds});
 
 _.each(worlds,function(world){
-    world.initSocket().serverRoutine();
+    world.initSocket();
 })
 
 lobby.initSocket();

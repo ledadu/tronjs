@@ -99,7 +99,7 @@ Player.prototype.routine = function() {
     }
 
     //------- Start player move ---------
-
+    
     //Pop command of this
     this.currentCommand = this.commandPool.shift();
 
@@ -223,7 +223,7 @@ Player.prototype.routine = function() {
         }else {
             if(this.powerStep === 0) {
                 this.color = darkenColor;
-            }
+            } 
 
         }
     }

@@ -96,10 +96,14 @@ World.prototype.serverRoutine = function() {
         nbPlayersPlaying = that.players.size(),
         playersNotDead   = this.players.getPlayersNotDead(),
         relaunch         = function() {
+            if (nbPlayersPlaying === 0) {
+                that.heartbeat = 0;
+                return;
+            }
             setTimeout(function() {
                 that.serverRoutine()
             }, (12 -that.id)); // nb world max + 2
-        }
+        };
 
     if (nbPlayersPlaying >1 && playersNotDead.size() == 1 ) {
         if (nbPlayersPlaying > 1) {
@@ -169,7 +173,7 @@ World.prototype.boniRoutine = function() {
     var that = this,
         aBonusHasBeenUpdated = false;
 
-    if (this.heartbeat % 1000 === 0) {
+    if (this.heartbeat % 300 === 0) {
         this.boni.addRandom();
         this.ioNamespace.emit('boniUpdate', this.boni.list);
     }
@@ -255,6 +259,7 @@ World.prototype.initSocket = function() {
                 player.getSocket = function(){return socket;}; //protect frm too mush recursion
 
                 var sid = that.httpServer.getSID(socket.request.headers.cookie);
+
                 that.httpServer.getSessionFromSID(sid,function(err, session){
                     console.log('Session from ioNamespace @@->', JSON.stringify(session));
                     if(!_.isUndefined(session) && !_.isUndefined(session.name)){
@@ -278,7 +283,9 @@ World.prototype.initSocket = function() {
                     bindSocketPlayerWorld.bindPrintDebug();
                     bindSocketPlayerWorld.bindDisconnect();
                     player.getSocket().emit('initParam', {player_id: player.id});
-
+                    if (that.players.size() === 1)  {
+                        that.serverRoutine();
+                    }
                 });
 
             });

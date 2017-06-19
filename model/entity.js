@@ -65,6 +65,7 @@ Entity.prototype.collisionTest = function(x,y) {
             y < 0 || this.y * world.pixelReso > world.height ||
             !_.isUndefined(world.bmp[x]) && world.bmp[x][y] != null && world.bmp[x][y].color.solid
         ) {
+
             if (this.isDestructible) {
                 this.kill();
             }
@@ -75,7 +76,7 @@ Entity.prototype.collisionTest = function(x,y) {
         if (touchedEntities.size() > 0) {
             touchedEntities.each(function(touchedEntity){
                 if (touchedEntity.id !== that.id) {
-                    touchedEntity.kill();
+                    touchedEntity.kill(); 
                     that.kill();
                 }
             });
@@ -85,16 +86,21 @@ Entity.prototype.collisionTest = function(x,y) {
         touchedEntities = world.boni.getEntitiesFromXY(x,y);
         if (touchedEntities.size() > 0) {
             touchedEntities.each(function(touchedEntity){
-               if (that.entityType === 'player') {
+               if (that.entityType === 'player') { 
+
                     var socket = that.getSocket();
+                    socket.emit('showMessagesSreeen',{text: '=> ' + touchedEntity.class + ' : ' + touchedEntity.content, color:that.color});
+
+                    if (touchedEntity.class === 'score') {
+                        that.score += touchedEntity.content;
+                    }
                     if (touchedEntity.class === 'playerClass') {
                         that.class = touchedEntity.content;
-                        socket.emit('showMessagesSreeen',{text: 'Got player class : ' + that.class, color:that.color});
                     }
                 }else{
                     world.emit('spawn',{type:'explosion', x:x, y:y, creatorId: that.id}); //move to kill !!
                 }
-                touchedEntity.destroy();
+                touchedEntity.destroy(); 
             });
         }
 
@@ -113,9 +119,8 @@ Entity.prototype.collisionTest = function(x,y) {
                     touchedEntity.kill();
                 }
 
-
             });
-    }
+        }
 
 
     }

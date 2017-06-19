@@ -176,6 +176,7 @@ var fff = new (function(){
         //Show powerState
         if (!_.isUndefined(currentPlayer)) {
             that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
+            that.graphics2.addChild(that.game.add.text(0, 550, currentPlayer.score,   {font: "italic 20px Arial", fill: "#ffffff"}));
         }
 
         // show screen message
