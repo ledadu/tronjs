@@ -12,6 +12,7 @@ compilePublicJs.addFolderSource('./publicJsSource/world');
 compilePublicJs.compileUglifyJs('./public/');
 
 var httpServer = new HttpServer(8181);
+console.log("listen :8181");
 
 var worlds = new Array();
 

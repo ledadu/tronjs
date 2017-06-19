@@ -129,7 +129,7 @@ var fff = new (function(){
                     }
                 });
             }
-        }); 
+        });
 
     };
 
@@ -172,7 +172,7 @@ var fff = new (function(){
 
         });
 
-       
+
         //Show powerState
         if (!_.isUndefined(currentPlayer)) {
             that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
@@ -196,13 +196,7 @@ var fff = new (function(){
 
         //Show bonus
         _.each(this.entities.boni, function(bonus){
-            var color = {
-                r: 64 + Math.round(Math.random()*128),
-                g: 64 + Math.round(Math.random()*128),
-                b: 64 + Math.round(Math.random()*128),
-            };
-
-            that.graphics2.beginFill(getIntColor(color), 1);
+            that.graphics2.beginFill(getIntColor(bonus.color), 1);
             that.graphics2.drawCircle(bonus.x * that.world.pixelReso, bonus.y * that.world.pixelReso, that.world.pixelReso);
         });
 
@@ -246,7 +240,7 @@ var fff = new (function(){
                         break;
                 }
                 that.graphics2.drawCircle(x * that.world.pixelReso, y * that.world.pixelReso, that.world.pixelReso * laser.step/4);
-           } 
+           }
         });
 
     }
