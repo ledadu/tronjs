@@ -7,7 +7,21 @@ var Player = function(params) {
     params = params || {};
     params.entityType = 'player';
 
-    var Model_base = require('./entity');
+    var Model_base = require('./entity')
+        colors = [
+             hexToColor('FB4D46'),
+             hexToColor('299617'),
+             hexToColor('5DADEC'),
+             hexToColor('5946B2'),
+             hexToColor('9C51B6'),
+             hexToColor('AF6E4D'),
+             hexToColor('BFAFB2'),
+             hexToColor('FF5470'),
+             hexToColor('FF7A00'),
+             hexToColor('FF007C'),
+             hexToColor('E936A7'),
+        ];
+
     extend(true, this, new Model_base(params));
 
     //construct
@@ -16,7 +30,7 @@ var Player = function(params) {
     //Put in function to todge 'Too much recurstion'
 //remove params socket! must pass by collection parent
 
-    this.color = getRandomColor2();
+    this.color = colors[Math.floor(Math.random()*colors.length)];
 
     this.score = 0;
     this.commandPool = [];
@@ -324,3 +338,19 @@ function lighten(color,force) {
     });
 };
 
+function hexToColor(hex) {
+    if (_.isUndefined(hex)) {
+        return {
+            r: 128,
+            g: 128,
+            b: 128,
+            a: 1,
+        };
+    }
+    var hexCutted = hex.match(/.{1,2}/g);
+    return {
+        r: parseInt(hexCutted[0],16),
+        g: parseInt(hexCutted[1],16),
+        b: parseInt(hexCutted[2],16),
+    };
+}
