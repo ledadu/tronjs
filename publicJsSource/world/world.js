@@ -246,13 +246,17 @@ var fff = new (function(){
     }
 
     this.bindChangeName = function() {
+
+        var that = this;
+
         $('.sendValue').bind('submit', function(e) {
             return false;
         });
 
         $('.sendValue').bind('click', function(e) {
             $form = $(e.currentTarget).closest('form');
-            this.socket.emit("sendValue", $form.serializeArray());
+            that.socket.emit("sendValue", $form.serializeArray());
+            console.log("sendValue", $form.serializeArray());
         });
 
     }

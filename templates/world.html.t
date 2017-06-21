@@ -9,14 +9,17 @@
             var worldId = {{worldId}};
         </script>
 
-        <script src="/world.js"></script>  
+        <script src="/world.js"></script>
     </head>
     <body>
         <div id="text"></div>
         <div id="id_user">id_user : {{id_user}}</div>
         <div id="cnv" style="border:solid 1px #eeeeee;position: relative;"></div>
         <form class="sendValue">
-            name <input name="nickname" value="{{name}}"/> <button >Change name</button>
+            Name <input name="nickname" value="{{name}}"/> <button >Change name</button>
+        </form>
+        <form class="sendValue">
+            Pixel <input name="pixelReso" value="{{pixelReso}}"/> <button >Change pixel resolution</button>
         </form>
     </body>
 </html>

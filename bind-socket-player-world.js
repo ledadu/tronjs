@@ -42,6 +42,11 @@ BindSocketPlayerWorld.prototype.bindSendValue = function() {
                     that.world.players.list[that.player.id].name = data.value;
                 }
             }
+
+            if (data.name == 'pixelReso') {
+                that.world.pixelReso = data.value;
+                that.world.restartWorld();
+            }
         });
 
     });
@@ -68,7 +73,7 @@ BindSocketPlayerWorld.prototype._executePlayerFunction = function(data) {
         }
 
         //that.socket.emit('message', data.keyFunction);
-    
+
         if (data.keyFunction == "clear") {
             this.player.activatePower = false;
             console.log("clear Bmp");
