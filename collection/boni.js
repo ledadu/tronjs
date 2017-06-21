@@ -1,5 +1,6 @@
 
 var extend = require('extend');
+var _Math = require('../_/math.js')
 
 var Bonus = require('../model/bonus');
 
@@ -39,12 +40,15 @@ Boni.prototype._prototype = function() {
 
 Boni.prototype.addRandom = function(options){
 
-    var bonusClass = ['score','score','playerClass'];
+    var bonusClass = [
+            {weight:2, content:'score'},
+            {weight:1, content:'playerClass'}
+        ],
         capitalize = function(str) {
             return str.replace(/\b\w/g, function(l){ return l.toUpperCase() });
         };
 
-    this[('addBonus' + capitalize(bonusClass[Math.round(Math.floor(bonusClass.length*Math.random()))]))]();
+    this[('addBonus' + capitalize(_Math.weightedSample(bonusClass)))]();
 
 };
 
@@ -65,5 +69,8 @@ Boni.prototype.addBonusPlayerClass = function(options){
 
     return this;
 };
+
+
+
 
 module.exports = Boni;

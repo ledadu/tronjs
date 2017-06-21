@@ -173,7 +173,7 @@ World.prototype.boniRoutine = function() {
     var that = this,
         aBonusHasBeenUpdated = false;
 
-    if (this.heartbeat % 300 === 0) {
+    if (this.heartbeat % 100 === 0) {
         this.boni.addRandom();
         this.ioNamespace.emit('boniUpdate', this.boni.list);
     }

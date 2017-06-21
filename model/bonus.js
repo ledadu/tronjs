@@ -37,14 +37,11 @@ var Bonus = function(params) {
 
         if (this.class == 'playerClass') {
             this.color     = colors[this.content];
-            console.log('color-playerClass', this.content, this.color)
         }
 
         if (!_.isUndefined(world.bmp[this.x]) && !_.isUndefined(world.bmp[this.x][this.y])) {
             world.bmp[this.x][this.y] = null;
         }
-
-    console.log(this.class,this.content);
 
     };
 
