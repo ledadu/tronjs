@@ -150,7 +150,9 @@ var fff = new (function(){
     this.refreshLayer = function() {
 
         var that = this,
-            currentPlayer = this.entities.players[currentPlayerId];
+            $powerbarvalue = $('#power-bar .power-value'),
+            currentPlayer  = this.entities.players[currentPlayerId],
+            power          = !_.isUndefined(currentPlayer) ? currentPlayer.powerCharge / currentPlayer.powerMax * 100 : 0;
 
         this.graphics2.clear();
         this.graphics2.removeChildren();
@@ -175,7 +177,20 @@ var fff = new (function(){
 
         //Show powerState
         if (!_.isUndefined(currentPlayer)) {
-            that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
+            $powerbarvalue.css('width', (power) + '%');
+
+            $powerbarvalue.removeClass('half');
+            $powerbarvalue.removeClass('full');
+
+            if (power >= 50) {
+                $powerbarvalue.addClass('half');
+            }
+
+            if (power >= 100) {
+                $powerbarvalue.addClass('full');
+            }
+
+//            that.graphics2.addChild(that.game.add.text(0, 580, Math.round(currentPlayer.powerCharge / currentPlayer.powerMax*100),   {font: "italic 20px Arial", fill: "#ffffff"}));
             that.graphics2.addChild(that.game.add.text(0, 550, currentPlayer.score,   {font: "italic 20px Arial", fill: "#ffffff"}));
         }
 

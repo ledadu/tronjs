@@ -14,12 +14,15 @@
     <body>
         <div id="text"></div>
         <div id="id_user">id_user : {{id_user}}</div>
-        <div id="cnv" style="border:solid 1px #eeeeee;position: relative;"></div>
         <form class="sendValue">
             Name <input name="nickname" value="{{name}}"/> <button >Change name</button>
         </form>
         <form class="sendValue">
             Pixel <input name="pixelReso" value="{{pixelReso}}"/> <button >Change pixel resolution</button>
         </form>
+        <div id="power-bar">
+            <div class="power-value" style="width:0%"></div>
+        </div>
+        <div id="cnv" style="position: relative;"></div>
     </body>
 </html>

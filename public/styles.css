@@ -1,9 +1,27 @@
   #cnv canvas{
         position: absolute;
         left: 0;
-        top: 0;		
+        top: 0;
     }
-    
+
     #text{
         display:none;
+    }
+
+    #power-bar{
+        width: 800px;
+    }
+    #power-bar .power-value{
+        height: 20px;
+        background-color: grey;
+    }
+
+    #power-bar .power-value.half{
+        height: 20px;
+        background-color: yellow;
+    }
+
+    #power-bar .power-value.full{
+        height: 20px;
+        background-color: red;
     }
