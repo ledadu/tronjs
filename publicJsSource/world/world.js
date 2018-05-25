@@ -16,7 +16,7 @@ var fff = new (function(){
             39: "right",
             38: "up",
             40: "down",
-            27: "clear",
+//            27: "clear",
             65: "activatePower",
             90: "activatePower2"
         },
