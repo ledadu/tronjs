@@ -116,6 +116,8 @@ var fff = new (function(){
 
     this.drawnBmp = function() {
 
+        var that = this;
+
         this.graphics.clear();
 
         if (_.isUndefined(this.world.bmp)) {
@@ -126,7 +128,7 @@ var fff = new (function(){
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
                     if (
-                        x != null && y != null && pixel != null && 
+                        x != null && y != null && pixel != null &&
                         that.offsetX + x * that.world.pixelReso > 0 &&
                         that.offsetX + x * that.world.pixelReso < that.screenSize.x &&
                         that.offsetY + y * that.world.pixelReso > 0 &&
@@ -140,8 +142,8 @@ var fff = new (function(){
         });
 */
 
-        for (var x = -2; x < (this.screenSize.x*1.5) / this.world.pixelReso ; x++) {
-            for (var y = -2; y < this.screenSize.y + 2; y++) {
+        for (var x = -2; x < (this.screenSize.x) / this.world.pixelReso ; x++) {
+            for (var y = -2; y < this.screenSize.y / this.world.pixelReso + 2; y++) {
                 var isInWorld  = x >= 0 && x <= (that.world.width / this.world.pixelReso) && y >= 0 && y <= (that.world.height / this.world.pixelReso),
                     pixel      = isInWorld && !_.isUndefined(that.world.bmp[x]) && !_.isNull(that.world.bmp[x]) && !_.isUndefined(that.world.bmp[x][y]) ? that.world.bmp[x][y] : null,
                     pixelX     = that.offsetX + x * that.world.pixelReso,
@@ -150,7 +152,7 @@ var fff = new (function(){
                                  pixelX < that.screenSize.x &&
                                  pixelY > 0 &&
                                  pixelY < that.screenSize.y;
-                if (isInScreen) {
+//                if (isInScreen) {
                     if (pixel != null) {
 
                         that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
@@ -162,7 +164,7 @@ var fff = new (function(){
 
                     }
 
-                }
+//                }
             }
         }
 
