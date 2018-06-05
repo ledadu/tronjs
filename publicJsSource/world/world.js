@@ -35,7 +35,7 @@ var fff = new (function(){
 
     this.socket;
     $(document).ready(function() {
-
+        that.$debug = $('#text');
         that.initSocket();
         that.initKeyBinding();
         that.bindChangeName();
@@ -141,30 +141,31 @@ var fff = new (function(){
             }
         });
 */
-
-        for (var x = -2; x < (this.screenSize.x) / this.world.pixelReso ; x++) {
-            for (var y = -2; y < this.screenSize.y / this.world.pixelReso + 2; y++) {
-                var isInWorld  = x >= 0 && x <= (that.world.width / this.world.pixelReso) && y >= 0 && y <= (that.world.height / this.world.pixelReso),
-                    pixel      = isInWorld && !_.isUndefined(that.world.bmp[x]) && !_.isNull(that.world.bmp[x]) && !_.isUndefined(that.world.bmp[x][y]) ? that.world.bmp[x][y] : null,
-                    pixelX     = that.offsetX + x * that.world.pixelReso,
-                    pixelY     = that.offsetY + y * that.world.pixelReso
+//TODO have the real world size !!!
+        for (var x = -2; x < 2+this.world.width/this.world.pixelReso ; x++) {
+            for (var y = -2; y < 2+this.world.height/this.world.pixelReso ; y++) {
+                var pixelX     = that.offsetX + x * that.world.pixelReso,
+                    pixelY     = that.offsetY + y * that.world.pixelReso,
                     isInScreen = pixelX > 0 &&
-                                 pixelX < that.screenSize.x &&
+                                 pixelX < this.screenSize.x &&
                                  pixelY > 0 &&
-                                 pixelY < that.screenSize.y;
-//                if (isInScreen) {
+                                 pixelY < this.screenSize.y
+                    pixel      = isInScreen && !_.isUndefined(that.world.bmp[x]) && !_.isNull(that.world.bmp[x]) && !_.isUndefined(that.world.bmp[x][y]) ? that.world.bmp[x][y] : null,
+                    isInWorld  = x >= 0 && x < this.world.width/this.world.pixelReso && y >= 0 && y < this.world.height/this.world.pixelReso;
+
+                if (isInScreen) {
                     if (pixel != null) {
 
                         that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
                         that.graphics.drawCircle(that.offsetX + x * that.world.pixelReso, that.offsetY + y * that.world.pixelReso, that.world.pixelReso);
                     }
                     if (!isInWorld) {
-                        that.graphics.beginFill(getIntColor({r:255,g:0,b:0}), 128);
+                        that.graphics.beginFill(getIntColor({r:255,g:0,b:0}), 255);
                         that.graphics.drawCircle(that.offsetX + x * that.world.pixelReso, that.offsetY + y * that.world.pixelReso, that.world.pixelReso);
-
                     }
 
-//                }
+
+                }
             }
         }
 
@@ -173,6 +174,10 @@ var fff = new (function(){
     function putmessage(textMess) {
         screenMessages.push({text: textMess.text, times: 500, color: textMess.color});
     };
+
+    this.drawnDebug = function(text) {
+        this.$debug.append(text + ' / ');
+    }
 
     this.initKeyBinding = function() {
         $(document).keydown(function(a) {
