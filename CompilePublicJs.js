@@ -25,6 +25,7 @@ CompilePublicJs.prototype.compileUglifyJs = function(folderPath) {
 		var uglifyJs = UglifyJS.parse(buffer);
 		uglifyJs.print(stream);
 		uglifyCode = stream.toString();
+		uglifyCode = buffer;  //deuglify
 		fs.writeFileSync(folderPath + baseFileName + '.js',uglifyCode);
 		console.log(foldersSource + " => "+ folderPath + baseFileName + '.js'  +  " compiled");
 	});

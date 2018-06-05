@@ -42,8 +42,9 @@ var fff = new (function(){
 
     });
 
+    this.screenSize = {x: 800, y: 600};
 
-    this.game = new Phaser.Game(800, 600, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
+    this.game = new Phaser.Game(this.screenSize.x, this.screenSize.y, Phaser.CANVAS, 'Tron', { create: createGame, update: _.noop, render: _.noop});
 
     function createGame() {
 
@@ -120,16 +121,50 @@ var fff = new (function(){
         if (_.isUndefined(this.world.bmp)) {
             return this;
         }
+/*
         $.each(this.world.bmp, function(x, cc) {
             if (cc != null) {
                 $.each(cc, function(y, pixel) {
-                    if (x != null && y != null && pixel != null) {
+                    if (
+                        x != null && y != null && pixel != null && 
+                        that.offsetX + x * that.world.pixelReso > 0 &&
+                        that.offsetX + x * that.world.pixelReso < that.screenSize.x &&
+                        that.offsetY + y * that.world.pixelReso > 0 &&
+                        that.offsetY + y * that.world.pixelReso < that.screenSize.y
+                    ) {
                         that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
-                        that.graphics.drawCircle(x * that.world.pixelReso, y * that.world.pixelReso, that.world.pixelReso);
+                        that.graphics.drawCircle(that.offsetX + x * that.world.pixelReso, that.offsetY + y * that.world.pixelReso, that.world.pixelReso);
                     }
                 });
             }
         });
+*/
+
+        for (var x = -2; x < (this.screenSize.x*1.5) / this.world.pixelReso ; x++) {
+            for (var y = -2; y < this.screenSize.y + 2; y++) {
+                var isInWorld  = x >= 0 && x <= (that.world.width / this.world.pixelReso) && y >= 0 && y <= (that.world.height / this.world.pixelReso),
+                    pixel      = isInWorld && !_.isUndefined(that.world.bmp[x]) && !_.isNull(that.world.bmp[x]) && !_.isUndefined(that.world.bmp[x][y]) ? that.world.bmp[x][y] : null,
+                    pixelX     = that.offsetX + x * that.world.pixelReso,
+                    pixelY     = that.offsetY + y * that.world.pixelReso
+                    isInScreen = pixelX > 0 &&
+                                 pixelX < that.screenSize.x &&
+                                 pixelY > 0 &&
+                                 pixelY < that.screenSize.y;
+                if (isInScreen) {
+                    if (pixel != null) {
+
+                        that.graphics.beginFill(getIntColor(pixel.color), pixel.color.a);
+                        that.graphics.drawCircle(that.offsetX + x * that.world.pixelReso, that.offsetY + y * that.world.pixelReso, that.world.pixelReso);
+                    }
+                    if (!isInWorld) {
+                        that.graphics.beginFill(getIntColor({r:255,g:0,b:0}), 128);
+                        that.graphics.drawCircle(that.offsetX + x * that.world.pixelReso, that.offsetY + y * that.world.pixelReso, that.world.pixelReso);
+
+                    }
+
+                }
+            }
+        }
 
     };
 
@@ -152,27 +187,34 @@ var fff = new (function(){
         var that = this,
             $powerbarvalue = $('#power-bar .power-value'),
             currentPlayer  = this.entities.players[currentPlayerId],
-            power          = !_.isUndefined(currentPlayer) ? currentPlayer.powerCharge / currentPlayer.powerMax * 100 : 0;
+            power          = !_.isUndefined(currentPlayer) ? currentPlayer.powerCharge / currentPlayer.powerMax * 100 : 0,
+            currentPlayerX = currentPlayer.x * this.world.pixelReso,
+            currentPlayerY = currentPlayer.y * this.world.pixelReso;
+
+        this.offsetX        = this.screenSize.x / 2 - currentPlayerX;
+        this.offsetY        = this.screenSize.y / 2 - currentPlayerY;
 
         this.graphics2.clear();
         this.graphics2.removeChildren();
 
 
         $.each(this.entities.players, function(playerName, player) {
-            var playerX = player.x * that.world.pixelReso,
-                playerY = player.y * that.world.pixelReso;
+            var playerX = that.offsetX + player.x * that.world.pixelReso,
+                playerY = that.offsetY + player.y * that.world.pixelReso;
 
             //show player neme
-            that.graphics2.addChild(that.game.add.text(playerX, playerY, player.name + '(' + player.score + ')', {font: "10px Arial", fill: "#ffffff"}));
+            that.graphics2.addChild(that.game.add.text(playerX, playerY, player.name + '(' + player.x + ',' + player.y + ')', {font: "10px Arial", fill: "#ffffff"}));
 
             //add new positions of players
 
             if(_.isUndefined(that.world.bmp[player.x]) || _.isNull(that.world.bmp[player.x])) {that.world.bmp[player.x] = [];}
             that.world.bmp[player.x][player.y] = player;
-            that.graphics.beginFill(getIntColor(player.color), player.color.a);
-            that.graphics.drawCircle(playerX, playerY, that.world.pixelReso);
+//            that.graphics.beginFill(getIntColor(player.color), player.color.a);
+//            that.graphics.drawCircle(playerX, playerY, that.world.pixelReso);
 
         });
+
+        this.drawnBmp();
 
 
         //Show powerState
@@ -212,20 +254,20 @@ var fff = new (function(){
         //Show bonus
         _.each(this.entities.boni, function(bonus){
             that.graphics2.beginFill(getIntColor(bonus.color), 1);
-            that.graphics2.drawCircle(bonus.x * that.world.pixelReso, bonus.y * that.world.pixelReso, that.world.pixelReso);
+            that.graphics2.drawCircle(that.offsetX + bonus.x * that.world.pixelReso, that.offsetY + bonus.y * that.world.pixelReso, that.world.pixelReso);
         });
 
 
        //Show missiles
         _.each(this.entities.missiles, function(missile){
             that.graphics2.beginFill(getIntColor(missile.color), 1);
-            that.graphics2.drawCircle(missile.x * that.world.pixelReso, missile.y * that.world.pixelReso, that.world.pixelReso);
+            that.graphics2.drawCircle(that.offsetX + missile.x * that.world.pixelReso, that.offsetY + missile.y * that.world.pixelReso, that.world.pixelReso);
         });
 
         //Show explosions
         _.each(this.entities.explosions, function(explosion){
             that.graphics2.beginFill(getIntColor(explosion.color), explosion.color.a);
-            that.graphics2.drawCircle(explosion.x * that.world.pixelReso, explosion.y * that.world.pixelReso, that.world.pixelReso * explosion.step/2);
+            that.graphics2.drawCircle(that.offsetX + explosion.x * that.world.pixelReso, that.offsetY + explosion.y * that.world.pixelReso, that.world.pixelReso * explosion.step/2);
         });
 
         //Show lasers
@@ -254,7 +296,7 @@ var fff = new (function(){
                         y++;
                         break;
                 }
-                that.graphics2.drawCircle(x * that.world.pixelReso, y * that.world.pixelReso, that.world.pixelReso * laser.step/4);
+                that.graphics2.drawCircle(that.offsetX + x * that.world.pixelReso, that.offsetY + y * that.world.pixelReso, that.world.pixelReso * laser.step/4);
            }
         });
 

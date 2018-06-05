@@ -22,8 +22,8 @@ var World = function(httpServer, io, idWorld) {
 
     //construct
     this.id = idWorld;
-    this.width       = 800;
-    this.height      = 600;
+    this.width       = 2000;
+    this.height      = 1000;
     this.pixelReso   = 5; 
     this.bmp         = [];
     this.players     = new Players({parent: this});
